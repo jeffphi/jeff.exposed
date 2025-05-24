@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--- See https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag --->
+     <meta name="viewport" content="width=device-width, initial-scale=1">
+     <link rel="icon" href="/assets/Profile-J.jpg" />
+    <title>Circles</title>
+  </head>
+<body>
+
+<canvas id="myCanvas" width="600" height="600" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<script>
+
+var numPlanes = (Math.random()*20)+4;
+var maxCircles = (Math.random()*10)+1;
+
+var c = document.getElementById("myCanvas");
+c.width = document.documentElement.clientWidth;
+c.height = document.documentElement.clientHeight;
+var ctx = c.getContext("2d");
+
+var step = 1.0/numPlanes;
+var frameSize = Math.min(c.width, c.height);
+
+for(var i=numPlanes; i>0; i--){
+	var numCircles = Math.random() * maxCircles;
+	for(var j=0; j<numCircles; j++){
+		var radius = (step*i*frameSize)/2.0;
+	  var x = Math.random() * c.width;
+	  var y = Math.random() * c.height;
+		drawCircle(x,y,radius);
+	}
+}
+
+function drawCircle(x,y,radius){
+	console.log("Circle: "+x+", "+y+", "+radius);
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, 2*Math.PI);
+  ctx.fillStyle = '#'+Math.floor(Math.random()*16777215).toString(16);
+  ctx.fill();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = '#003300';
+  ctx.stroke();
+}
+</script>
+
+</body>
+</html>
