@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Random Pickleball Serves</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <style>
+        canvas {
+            border: 1px solid #000000;
+        }
+    </style>
+
+</head>
+
+<body onload="handlePageLoad()">
+
+    <div style="display: flex; align-items: center; margin-top:-20px">
+        <h1>
+            Random Pickleball Serves
+        </h1>
+    </div>
+
+    <h2>Side View</h2>
+    <div style="position: relative; height:240px; width:880px;">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <h2>Top-Down View</h2>
+    <div style="position: relative; height:400px; width:880px;">
+        <canvas id="chart-top"></canvas>
+    </div>
+
+</body>
+
+<script>
+
+    let chartCanvas;
+    let topDownCanvas;
+    let ctx;
+
+    const g = 32; // ft/sec^2
+
+    //Side view
+    const viewHeight = 12; // 12 ft.
+    const viewWidth = 44; // 44 ft
+
+    let ballInterval;
+    let trajectoryIndex = 0;
+
+    const ball = {
+        x: 0,      // Down the court (feet)
+        y: 5,      // Height (feet)
+        z: 0,      // Left/right position (feet)
+        vx: 0,     // Forward velocity (ft/s)
+        vz: 0,     // Left/right velocity (ft/s)
+        vy: 0,     // Vertical velocity (ft/s)
+        angle: 30, // Vertical launch angle (degrees)
+        angle2: 10 // Horizontal launch angle (degrees)
+    };
+
+    let ballIsOut;
+
+    function handlePageLoad() {
+        chartCanvas = document.getElementById('chart');
+        ctx = chartCanvas.getContext("2d");
+        chartCanvas.height = 240;
+        chartCanvas.width = 880;
+
+        topDownCanvas = document.getElementById('chart-top');
+        ctxTop = topDownCanvas.getContext("2d");
+        topDownCanvas.height = 400;
+        topDownCanvas.width = 880;
+
+        ball.x = 0
+        ball.y = Math.floor(Math.random() * 4) + 3;
+        ball.z = Math.floor(Math.random() * 21); // 0 to 20
+
+        let hitSpeed = Math.floor(Math.random() * 20) + 25;
+        let angleVertical = Math.floor(Math.random() * 66) - 10;
+
+        let angleHorizontal;
+
+        // Note: Zero is at the bottom the the screen
+        if(ball.z < 7){
+            //42° to 0°
+            angleHorizontal = Math.floor(Math.random() * 43);
+        } else if (ball.z < 14){
+            //24° to -24°
+            angleHorizontal = Math.floor(Math.random() * 48) - 24;
+        } else {
+            //0 to -42°
+            angleHorizontal = Math.floor(Math.random() * 43) * -1;
+        }
+
+        initBall(ball, hitSpeed, angleVertical, angleHorizontal);
+
+        trajectoryIndex = 0;
+        ballIsOut = false;
+        //const trajectory = simulateBall(ball, 0.01, 3);
+        const trajectory = simulateBall3D(ball, 0.01, 3);
+
+        ballInterval = setInterval(function () {
+            drawTrajectory(trajectory);
+        }, 10);
+
+    }
+
+    function drawTrajectory(trajectory) {
+        if (ballIsOut) {
+            clearInterval(ballInterval);
+            setTimeout(handlePageLoad, 500);
+            return;
+        }
+
+        let tempBall = { x: trajectory[trajectoryIndex].x, 
+            y: trajectory[trajectoryIndex].y,
+            z: trajectory[trajectoryIndex].z
+        };
+
+        drawChart(tempBall);
+        trajectoryIndex++;
+        if (trajectoryIndex == trajectory.length) {
+            clearInterval(ballInterval);
+            setTimeout(handlePageLoad, 500);
+        }
+
+        // Check net collision
+        if (tempBall.x > 21.5 && tempBall.x < 22.5 && tempBall.y < 3) {
+            ballIsOut = true;
+        }
+
+        // Check out of bounds
+        if (tempBall.x > 44 || tempBall.z < 0.0 || tempBall.z > 20) {
+            ballIsOut = true;
+        }
+    };
+
+    // Set initial velocities based on angles and speed
+    function initBall(ball, speed, angle1Degrees, angle2Degrees) {
+        ball.angle = angle1Degrees;
+        ball.angle2 = angle2Degrees;
+        const theta1 = ball.angle * (Math.PI / 180); // Vertical angle (rad)
+        const theta2 = ball.angle2 * (Math.PI / 180); // Horizontal angle (rad)
+        ball.vx = speed * Math.cos(theta1) * Math.cos(theta2);
+        ball.vz = speed * Math.cos(theta1) * Math.sin(theta2);
+        ball.vy = speed * Math.sin(theta1);
+    }
+
+    function drawChart(ball) {
+        // Side View
+        let h = chartCanvas.height; // 12 * 20 (240): 20px == 1 ft. Ball == 4in == 5px
+        let w = chartCanvas.width; // 44 * 20 (880)
+        ctx.clearRect(0, 0, w, h);
+
+        ctx.beginPath();
+        ctx.moveTo(22 * 20, 240);
+        ctx.lineTo(22 * 20, 240 - (20 * 3));
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.fillStyle = "Yellow";
+        ctx.arc(ball.x * 20, 240 - ball.y * 20 - 5, 5, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.fill();
+
+        // Top-Down View
+        h = topDownCanvas.height;
+        w = topDownCanvas.width;
+        ctxTop.clearRect(0, 0, w, h);
+
+        ctxTop.fillStyle = "rgb(33, 89, 135)";
+        ctxTop.fillRect(0, 0, 15 * 20, 20 * 20);
+        ctxTop.fillRect(29 * 20, 0, 15 * 20, 20 * 20);
+
+        ctxTop.fillStyle = "rgb(70, 108, 54)";
+        ctxTop.fillRect(15 * 20, 0, 14 * 20, 20 * 20);
+
+        ctxTop.strokeStyle = "White";
+        ctxTop.lineWidth = 3;
+        ctxTop.beginPath();
+        ctxTop.moveTo(15 * 20, 0);
+        ctxTop.lineTo(15 * 20, 20 * 20);
+        ctxTop.stroke();
+
+        ctxTop.moveTo(22 * 20, 0);
+        ctxTop.lineTo(22 * 20, 20 * 20);
+        ctxTop.stroke();
+
+        ctxTop.moveTo(29 * 20, 0);
+        ctxTop.lineTo(29 * 20, 20 * 20);
+        ctxTop.stroke();
+
+        ctxTop.moveTo(0, 10 * 20);
+        ctxTop.lineTo(15 * 20, 10 * 20);
+        ctxTop.stroke();
+
+        ctxTop.moveTo(29 * 20, 10 * 20);
+        ctxTop.lineTo(44 * 20, 10 * 20);
+        ctxTop.stroke();
+
+        ctxTop.beginPath();
+        let diameter = ball.y + 5;
+        ctxTop.fillStyle = "Yellow";
+        ctxTop.arc(ball.x * 20, 400 - ball.z * 20 - 5, diameter, 0, 2 * Math.PI);
+        ctxTop.stroke();
+        ctxTop.fill();
+
+    }
+
+    function simulateBall3D(ball, dt, maxTime) {
+        const g = 32.174;
+        const history = [];
+        let t = 0;
+
+        while (t <= maxTime) {
+            // Check for bounce in the next timestep
+            const tBounce = solveBounceTime(ball.y, ball.vy, g);
+            if (tBounce !== null && tBounce <= dt) {
+                // Move to bounce point
+                ball.x += ball.vx * tBounce;
+                ball.z += ball.vz * tBounce;
+                ball.y = 0;
+                ball.vy -= g * tBounce;
+                t += tBounce;
+                history.push({ x: ball.x, y: ball.y, z: ball.z, t });
+
+                // Handle bounce
+                handleBounce(ball);
+
+                // Simulate remaining time after bounce
+                const remainingTime = dt - tBounce;
+                ball.x += ball.vx * remainingTime;
+                ball.z += ball.vz * remainingTime;
+                ball.y += ball.vy * remainingTime - 0.5 * g * remainingTime ** 2;
+                ball.vy -= g * remainingTime;
+                t += remainingTime;
+            } else {
+                // Normal motion (no bounce)
+                ball.x += ball.vx * dt;
+                ball.z += ball.vz * dt;
+                ball.y += ball.vy * dt - 0.5 * g * dt ** 2;
+                ball.vy -= g * dt;
+                t += dt;
+            }
+            history.push({ x: ball.x, y: ball.y, z: ball.z, t });
+            if (ball.y <= 0 && Math.abs(ball.vy) < 0.1) break; // Stop if settled
+        }
+        return history;
+    }
+    
+    function handleBounce(ball, e = 0.7) {
+        // Reverse vertical velocity and apply COR
+        ball.vy = -e * ball.vy;
+
+        // Optional: Reduce horizontal velocities (friction)
+        ball.vx *= 0.9;
+        ball.vz *= 0.9;
+
+        // Update angle (in degrees)
+        ball.angle = Math.atan2(ball.vy, Math.sqrt(ball.vx ** 2 + ball.vz ** 2)) * (180 / Math.PI);
+        ball.angle2 = Math.atan2(ball.vz, ball.vx) * (180 / Math.PI);
+    }
+ 
+    function solveBounceTime(y0, vy, g) {
+        // Quadratic equation: 0.5*g*t² - vy*t - y0 = 0
+        const a = 0.5 * g;
+        const b = -vy;
+        const c = -y0;
+        const discriminant = b * b - 4 * a * c;
+        if (discriminant < 0) return null; // No bounce (ball never hits the ground)
+        const t1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+        const t2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+        // Return the smallest positive time
+        if (t1 > 0 && t2 > 0) return Math.min(t1, t2);
+        else if (t1 > 0) return t1;
+        else if (t2 > 0) return t2;
+        else return null;
+    }
+    
+
+</script>
+
+</html>
