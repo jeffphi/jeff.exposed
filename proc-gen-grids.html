@@ -1,0 +1,395 @@
+<!doctype html>
+
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jeff's Proc-Gen Grids</title>
+
+    <meta name="description" content="Playground for exploring different procedural generation approaches.">
+
+    <!--
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <meta property="og:image:alt" content="">
+
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icon.png">
+    -->
+
+    <style>
+        * {
+            font-family: "sans-serif";
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Jeff's Proc-Gen Grids</h1>
+    <i>See this project on <a href="https://glitch.com/~jeffs-proc-gen-grids">Glitch.com</a></i>
+    <hr/>
+    <div>
+        <h2>Random Elements</h2>
+        <p>This grid contains random grayscale data from 0 to 255.</p>
+        <br />
+        <button type="button" onclick="grid1.handleStaticClick()">Static</button>
+        <button type="button" onclick="grid1.generateDynamic()">Dynamic</button>
+        <div>
+            <br />
+            Dynamic rate:
+            <input type="range" min="1" max="999" value="500" oninput="grid1.updateSlider(this.value)">
+            <br />
+            <br />
+            <div>
+                <canvas id="canvas-1" width="500" height="500"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h2>Grow From Random Seeds</h2>
+        <p>Random seeds are placed and then the grid fills in with values a bit less than the average of neighboring
+            cells.</p>
+        Number of seeds:
+        <input type="range" min="1" max="40" value="20" oninput="grid2.handleSeeds(this.value)">
+        <br/>
+        Decay rate:
+        <input type="range" min="1" max="40" value="20" oninput="grid2.handleDecay(this.value)">
+        <br />
+        <input type="checkbox" onclick="grid2.handleDiagonalsCheckbox(this.checked)" />
+        Include diagonals
+        <br />
+        <br />
+        <button type="button" onclick="grid2.resetSeeds()">Reset</button>
+        <button type="button" onclick="grid2.grow()">Grow</button>
+        <br />
+        <br />
+        <div>
+            <canvas id="canvas-2" width="500" height="500"></canvas>
+        </div>
+    </div>
+
+    <script>
+
+        function Grid1() {
+            let canvas = {}
+            const canvasSize = 500;
+            const cellDim = 30
+            const data = new Map();
+            let dynamicInterval = {};
+            let dynamicRate = 500;
+            let isRunning = false;
+
+            this.clearCanvas = function clearCanvas() {
+                clearInterval(dynamicInterval);
+                Util.clearCanvas(canvas, canvasSize);
+            }
+
+            this.drawGrid = function drawGrid() {
+                let ctx = canvas.getContext("2d");
+
+                // Draw vertical lines
+                let inc = canvasSize / cellDim;
+                for (let i = 0; i < cellDim; i++) {
+                    ctx.moveTo(inc * i, 0);
+                    ctx.lineTo(inc * i, canvasSize);
+                    ctx.stroke();
+                }
+
+                // Draw horizontal lines
+                for (let i = 0; i < cellDim; i++) {
+                    ctx.moveTo(0, inc * i);
+                    ctx.lineTo(canvasSize, inc * i);
+                    ctx.stroke();
+                }
+
+                // This makes a simple, yet interesting, effect :) 
+                /*for (let i = 0; i < 10; i++){
+                    ctx.moveTo(0, inc * i);
+                    ctx.lineTo(inc * i, canvasSize);
+                    ctx.stroke();
+                }*/
+            }
+
+            this.generateDynamic = function generate() {
+                if (!isRunning) {
+                    dynamicInterval = setInterval(generateRandom, dynamicRate);
+                    isRunning = true;
+                }
+            }
+
+            function generateRandom() {
+                for (let row = 0; row < cellDim; row++) {
+                    for (let col = 0; col < cellDim; col++) {
+                        let val = Math.floor(Math.random() * 256);
+                        data.get(row + "," + col).curVal = val;
+                    }
+                }
+
+                Util.drawData(data, canvas, canvasSize, cellDim);
+            }
+
+            this.handleStaticClick = function staticClick() {
+                if (isRunning) {
+                    clearInterval(dynamicInterval);
+                    isRunning = false;
+                }
+                generateRandom();
+            }
+
+            this.updateSlider = function (val) {
+                dynamicRate = 1000 - val;
+                if (isRunning) {
+                    clearInterval(dynamicInterval);
+                    dynamicInterval = setInterval(generateRandom, dynamicRate);
+                }
+            }
+
+            // Inititalization...
+            Util.initData(data, cellDim);
+            canvas = document.getElementById("canvas-1");
+            generateRandom();
+        }
+
+        function Grid2() {
+            let canvas = {}
+            const canvasSize = 500;
+            const cellDim = 30
+            const data = new Map();
+            let numSeeds = 20;
+            let decayFactor = 20;
+
+            let growInterval = {};
+            let growRate = 50;
+            let isRunning = false;
+
+            let includeDiagonals = false;
+
+            function doGrowthPass() {
+                let curCell = {};
+                let tempCell = {};
+                let numSetCells = 0;
+
+                for (let row = 0; row < cellDim; row++) {
+                    for (let col = 0; col < cellDim; col++) {
+
+                        let neighborCount = 0;
+                        let sum = 0;
+                        curCell = data.get(row + "," + col);
+
+                        if (curCell.isSet) {
+                            numSetCells++;
+                            continue;
+                        }
+
+                        //Get upper neighbor
+                        if (row > 0) {
+                            tempCell = data.get(row - 1 + "," + col);
+                            if (tempCell.isSet) {
+                                neighborCount++;
+                                sum += tempCell.curVal;
+                            }
+                        }
+                        //Get right neighbor
+                        if (col < cellDim - 1) {
+                            tempCell = data.get(row + "," + (col + 1));
+                            if (tempCell.isSet) {
+                                neighborCount++;
+                                sum += tempCell.curVal;
+                            }
+                        }
+
+                        //Get lower neighbor
+                        if (row < cellDim - 1) {
+                            tempCell = data.get((row + 1) + "," + col);
+                            if (tempCell.isSet) {
+                                neighborCount++;
+                                sum += tempCell.curVal;
+                            }
+                        }
+
+                        //Get left neighbor
+                        if (col > 0) {
+                            tempCell = data.get(row + "," + (col - 1));
+                            if (tempCell.isSet) {
+                                neighborCount++;
+                                sum += tempCell.curVal;
+                            }
+                        }
+
+                        if (includeDiagonals) {
+                            //Get upper left
+                            if (row > 0 && col > 0) {
+                                tempCell = data.get(row - 1 + "," + (col - 1));
+                                if (tempCell.isSet) {
+                                    neighborCount++;
+                                    sum += tempCell.curVal;
+                                }
+                            }
+
+                            //Get upper right
+                            if (row > 0 && col < cellDim - 1) {
+                                tempCell = data.get(row - 1 + "," + (col + 1));
+                                if (tempCell.isSet) {
+                                    neighborCount++;
+                                    sum += tempCell.curVal;
+                                }
+                            }
+
+                            //Get lower right
+                            if (col < cellDim - 1 && row < cellDim - 1) {
+                                tempCell = data.get((row + 1) + "," + (col + 1));
+                                if (tempCell.isSet) {
+                                    neighborCount++;
+                                    sum += tempCell.curVal;
+                                }
+                            }
+
+                            //Get lower left
+                            if (col > 0 && row < cellDim - 1) {
+                                tempCell = data.get((row + 1) + "," + (col - 1));
+                                if (tempCell.isSet) {
+                                    neighborCount++;
+                                    sum += tempCell.curVal;
+                                }
+                            }
+                        }
+
+                        if (neighborCount > 0) {
+                            numSetCells++;
+                            let avg = Math.ceil(sum / neighborCount);
+                            curCell.nextVal = avg + Math.ceil(Math.random() * decayFactor);
+                            curCell.isSet = true;
+                            //curCell.curVal = curCell.nextVal;
+
+                        }
+                    }
+                }
+
+                //Update curVal from NextVal
+                for (let row = 0; row < cellDim; row++) {
+                    for (let col = 0; col < cellDim; col++) {
+                        let curCell = data.get(row + "," + col);
+
+                        if(curCell.isSet){
+                            curCell.curVal = curCell.nextVal;
+                        }
+                    }
+                }
+
+                Util.drawData(data, canvas, canvasSize, cellDim);
+
+                console.log("NumSetCells: " + numSetCells)
+                if (numSetCells == cellDim * cellDim) {
+                    console.log("All cells set!");
+
+                    //Kill the interval
+                    clearInterval(growInterval);
+
+                    //Draw the canvas
+                    Util.drawData(data, canvas, canvasSize, cellDim);
+                }
+            }
+
+            function generateRandomSeeds() {
+                for (let i = 0; i < numSeeds; i++) {
+                    let row = Math.floor(Math.random() * cellDim);
+                    let col = Math.floor(Math.random() * cellDim);
+                    let val = 0;
+                    data.get(row + "," + col).curVal = val;
+                    data.get(row + "," + col).nextVal = val;
+                    data.get(row + "," + col).isSet = true;
+
+                }
+
+                Util.drawData(data, canvas, canvasSize, cellDim);
+            }
+
+            this.grow = function () {
+                if (isRunning) {
+                    return;
+                }
+
+                isRunning = true;
+                growInterval = setInterval(doGrowthPass, growRate);
+            }
+
+            this.handleDecay = function (val) {
+                decayFactor = val;
+            }
+
+            this.handleDiagonalsCheckbox = function (isChecked) {
+                includeDiagonals = isChecked;
+            }
+
+            this.handleSeeds = function (seeds) {
+                numSeeds = seeds;
+            }
+
+            this.resetSeeds = function () {
+                if (isRunning) {
+                    clearInterval(growInterval);
+                    isRunning = false;
+                }
+                Util.clearCanvas(canvas, canvasSize);
+                Util.initData(data, cellDim);
+                generateRandomSeeds();
+            }
+
+            // Inititalization...
+            Util.initData(data, cellDim);
+            canvas = document.getElementById("canvas-2");
+            this.resetSeeds();
+        }
+
+        const Util = {
+            clearCanvas(canvas, canvasSize) {
+                let ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvasSize, canvasSize);
+            },
+
+            drawData(data, canvas, canvasSize, cellDim) {
+
+                let ctx = canvas.getContext("2d");
+                let inc = canvasSize / cellDim;
+
+                for (let row = 0; row < cellDim; row++) {
+                    for (let col = 0; col < cellDim; col++) {
+                        let val = data.get(row + "," + col).curVal;
+                        ctx.fillStyle = Util.rgb(val, val, val);
+                        ctx.fillRect(row * cellDim / 2, col * cellDim / 2, inc, inc);
+                    }
+                }
+            },
+
+            initData(data, cellDim) {
+                // Init Map. Keys are "row,col" values hold current and next values, 0 to 255.
+                // isSet is used to differentiate between the init value vs. one explicity set afterwards
+                for (let row = 0; row < cellDim; row++) {
+                    for (let col = 0; col < cellDim; col++) {
+                        data.set(row + "," + col, { curVal: 255, nextVal: 255, isSet: false });
+                    }
+                }
+            },
+
+            rgb(r, g, b) {
+                return "rgb(" + r + "," + g + "," + b + ")";
+            },
+        }
+
+        // Let's get the party started!
+        const grid1 = new Grid1();
+        const grid2 = new Grid2();
+
+
+    </script>
+
+</body>
+
+</html>
