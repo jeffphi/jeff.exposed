@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!--- See https://developer.mozilla.org/en-US/docs/Web/HTML/Viewport_meta_tag --->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="icon" href="/assets/Profile-J.jpg" /> -->
+    <title>Moiré Patterns</title>
+</head>
+
+<body>
+    <h1>Moiré Patterns</h1>
+    <div>Click and drag to move top layer grid</div>
+    <br/>
+    <div>
+        <button onclick="toggleBgRotation()">Toggle Rotation</button><br/>
+        Speed: <input id="rotationSpeedSlider" type="range" min="0.1" max="5" value="0.1" step="0.1">
+    </div>
+    <div>
+        <canvas id="bg-canvas" style="border:1px solid #d3d3d3; position:absolute"></canvas>
+        <canvas id="fg-canvas" style="border:1px solid #d3d3d3; position:absolute"></canvas>
+    </div>
+
+    <script>
+
+        let bgCanvas = document.getElementById("bg-canvas");
+        bgCanvas.width = 600;
+        bgCanvas.height = 600;
+        var bgCtx = bgCanvas.getContext("2d");
+
+        let fgCanvas = document.getElementById("fg-canvas");
+        fgCanvas.width = 600;
+        fgCanvas.height = 600;
+        fgCanvas.addEventListener("mousedown", onMouseDown);
+        fgCanvas.addEventListener("mousemove", onMouseMove);
+        fgCanvas.addEventListener("mouseup", onMouseUp);
+        fgCanvas.addEventListener("mouseout", onMouseOut);
+        let fgCtx = fgCanvas.getContext("2d");
+
+        let isMouseDown = false;
+        let mouseX;
+        let mouseY;
+
+        let bgLineWidth = 1;
+        let bgSquareWidth = 8;
+        let isBgRotating = false;
+        let bgRotationInterval;
+        let bgRotationAngle = 0.1;
+        let bgRotationSpeed = 100;
+
+        let slider = document.getElementById("rotationSpeedSlider");
+        slider.addEventListener("input", onSliderChange);
+
+        let fgLineWidth = 1;
+        let fgSquareWidth = 8;
+
+        drawBackground();
+        drawForeground();
+
+        function drawBackground() {
+            bgCtx.beginPath();
+            for (let r = 0; r < 76; r++) {
+                bgCtx.moveTo(0, r * bgSquareWidth);
+                bgCtx.lineTo(bgCanvas.width, r * bgSquareWidth);
+            }
+
+            for (let c = 0; c < 76; c++) {
+                bgCtx.moveTo(c * bgSquareWidth, 0);
+                bgCtx.lineTo(c * bgSquareWidth, bgCanvas.height);
+            }
+            bgCtx.stroke();
+        }
+
+        function drawForeground(x = 0, y = 0) {
+            clearTransformedContext(fgCtx);
+            fgCtx.beginPath();
+            for (let r = 0; r < 76; r++) {
+                fgCtx.moveTo(x, y + r * fgSquareWidth);
+                fgCtx.lineTo(bgCanvas.width + x, y + r * fgSquareWidth);
+            }
+
+            for (let c = 0; c < 76; c++) {
+                fgCtx.moveTo(x + c * fgSquareWidth, y);
+                fgCtx.lineTo(x + c * fgSquareWidth, bgCanvas.height + y);
+            }
+            fgCtx.stroke();
+        }
+
+        function clearTransformedContext(ctx) {
+            ctx.save();
+
+            // Use the identity matrix while clearing the canvas
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, 600, 600);
+
+            ctx.restore();
+        }
+
+        function rotateBg() {
+            clearTransformedContext(bgCtx);
+            bgCtx.translate(300, 300);
+            bgCtx.rotate(bgRotationAngle * Math.PI / 180);
+            bgCtx.translate(-300, -300);
+            drawBackground();
+        }
+
+        function toggleBgRotation() {
+            isBgRotating = !isBgRotating;
+
+            if (!isBgRotating) {
+                // Clear interval
+                clearInterval(bgRotationInterval);
+            }
+            else {
+                // Start interval
+                bgRotationInterval = setInterval(rotateBg, bgRotationSpeed);
+            }
+        }
+
+        function onMouseDown(e) {
+            isMouseDown = true;
+            mouseX = e.offsetX;
+            mouseY = e.offsetY;
+        }
+
+        function onMouseMove(e) {
+            if (isMouseDown) {
+                drawForeground(e.offsetX - mouseX, e.offsetY - mouseY);
+            }
+        }
+
+        function onMouseUp(e) {
+            isMouseDown = false;
+        }
+
+        function onMouseOut(e) {
+            isMouseDown = false;
+        }
+
+        function onSliderChange(){
+            bgRotationAngle = slider.value;
+        }
+
+    </script>
+
+</body>
+
+</html>
