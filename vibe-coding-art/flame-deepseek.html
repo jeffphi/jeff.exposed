@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Flame Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="flameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('flameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match window but maintain 1:1 aspect ratio for cells
+        function resizeCanvas() {
+            const size = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+            canvas.width = size;
+            canvas.height = size;
+            cellSize = size / gridSize;
+        }
+        
+        const gridSize = 100;
+        let cellSize;
+        let flameGrid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+        
+        // Flame colors (from hot to cool)
+        const flameColors = [
+            '#ff0000', // Red
+            '#ff5a00', // Orange-red
+            '#ff9a00', // Orange
+            '#ffce00', // Yellow-orange
+            '#ffe808', // Yellow
+            '#ffffff', // White (hottest part)
+            '#330000', // Dark red (cooling)
+            '#110000'  // Very dark red (almost out)
+        ];
+        
+        // Initialize the flame
+        function initFlame() {
+            // Create a base line of hot particles at the bottom
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = gridSize - 5; y < gridSize; y++) {
+                    // Random intensity to make it uneven
+                    flameGrid[x][y] = Math.random() > 0.7 ? 6 : 5;
+                }
+            }
+        }
+        
+        // Update the flame animation
+        function updateFlame() {
+            // Create a new grid for the next frame
+            const newGrid = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
+            
+            // Process each cell
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    const current = flameGrid[x][y];
+                    
+                    if (current > 0) {
+                        // Flame cools down
+                        let newValue = current - 0.2 + (Math.random() * 0.4 - 0.2);
+                        
+                        // Random chance to spawn new flame at the bottom
+                        if (y >= gridSize - 5 && Math.random() > 0.9) {
+                            newValue = 5 + Math.random();
+                        }
+                        
+                        // Move flame upward with some randomness
+                        let newX = x;
+                        let newY = y - 1;
+                        
+                        // Add some horizontal movement
+                        if (Math.random() > 0.7) {
+                            newX += Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+                        }
+                        
+                        // Keep within bounds
+                        newX = Math.max(0, Math.min(gridSize - 1, newX));
+                        newY = Math.max(0, Math.min(gridSize - 1, newY));
+                        
+                        // Only update if the new value is higher than what's already there
+                        if (newValue > newGrid[newX][newY]) {
+                            newGrid[newX][newY] = newValue;
+                        }
+                    }
+                }
+            }
+            
+            // Add some random sparks at the bottom
+            for (let i = 0; i < 5; i++) {
+                const sparkX = Math.floor(Math.random() * gridSize);
+                const sparkY = gridSize - 1 - Math.floor(Math.random() * 3);
+                newGrid[sparkX][sparkY] = 6;
+            }
+            
+            flameGrid = newGrid;
+        }
+        
+        // Render the flame
+        function renderFlame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let x = 0; x < gridSize; x++) {
+                for (let y = 0; y < gridSize; y++) {
+                    const value = flameGrid[x][y];
+                    if (value > 0) {
+                        // Determine color based on flame intensity
+                        let colorIndex = Math.floor(value);
+                        colorIndex = Math.max(0, Math.min(flameColors.length - 1, colorIndex));
+                        
+                        // Add some transparency for smoother look
+                        let alpha = value - Math.floor(value);
+                        alpha = 0.2 + alpha * 0.8; // Ensure minimum visibility
+                        
+                        ctx.fillStyle = flameColors[colorIndex];
+                        ctx.globalAlpha = alpha;
+                        ctx.fillRect(
+                            x * cellSize, 
+                            y * cellSize, 
+                            Math.ceil(cellSize), 
+                            Math.ceil(cellSize)
+                        );
+                    }
+                }
+            }
+            
+            ctx.globalAlpha = 1.0;
+        }
+        
+        // Animation loop
+        function animate() {
+            updateFlame();
+            renderFlame();
+            requestAnimationFrame(animate);
+        }
+        
+        // Initialize
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+        
+        resizeCanvas();
+        initFlame();
+        animate();
+    </script>
+</body>
+</html>
