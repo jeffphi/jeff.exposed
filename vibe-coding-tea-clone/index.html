@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEA-style Word Pattern Matcher</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .input-section {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        input[type="text"]:disabled {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        button:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+        .help-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        .results-section {
+            margin-top: 30px;
+        }
+        .results-header {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #eee;
+        }
+        .result-word {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 500;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+        .result-word:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .no-results {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+        .error {
+            color: #d73502;
+            background: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Word Pattern Matcher</h1>
+        <p class="subtitle">TEA-style pattern matching tool</p>
+        
+        <div class="input-section">
+            <label for="dictionary">Select Dictionary:</label>
+            <select id="dictionary" onchange="loadDictionary()">
+                <option value="">-- Select Dictionary --</option>
+                <option value="scowl.english.50">SCOWL English 50</option>
+                <option value="scowl.english.95">SCOWL English 95</option>
+            </select>
+            <div id="dictStatus" class="help-text" style="display: none; margin-top: 10px;">
+                Loading dictionary...
+            </div>
+        </div>
+
+        <div class="input-section">
+            <label for="pattern">Enter Pattern:</label>
+            <input type="text" id="pattern" placeholder="e.g., c.t or h*se or p.zz*" disabled>
+            <div class="help-text">
+                <strong>Pattern Guide:</strong><br>
+                • Use <strong>.</strong> (period) to match any single letter<br>
+                • Use <strong>*</strong> (asterisk) to match zero or more letters<br>
+                • Examples: "c.t" matches "cat", "cut", "cot" | "h*se" matches "house", "horse", "hose"
+            </div>
+            <button onclick="searchPattern()" id="searchBtn" disabled>Search</button>
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header" id="resultsHeader" style="display: none;">
+                Results: <span id="resultCount">0</span> matches found
+            </div>
+            <div id="results" class="results-grid" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Dictionary storage
+        let currentDictionary = [];
+        let dictionaryLoaded = false;
+
+        // Load dictionary from file
+        async function loadDictionary() {
+            const select = document.getElementById('dictionary');
+            const dictStatus = document.getElementById('dictStatus');
+            const patternInput = document.getElementById('pattern');
+            const searchBtn = document.getElementById('searchBtn');
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            const resultsHeader = document.getElementById('resultsHeader');
+
+            // Clear previous results and errors
+            errorDiv.style.display = 'none';
+            resultsDiv.style.display = 'none';
+            resultsHeader.style.display = 'none';
+
+            const selectedDict = select.value;
+            
+            if (!selectedDict) {
+                // No dictionary selected
+                currentDictionary = [];
+                dictionaryLoaded = false;
+                patternInput.disabled = true;
+                searchBtn.disabled = true;
+                dictStatus.style.display = 'none';
+                return;
+            }
+
+            try {
+                // Show loading status
+                dictStatus.textContent = 'Loading dictionary...';
+                dictStatus.style.display = 'block';
+                dictStatus.style.background = '#e3f2fd';
+                dictStatus.style.borderColor = '#2196f3';
+                
+                // Disable UI while loading
+                patternInput.disabled = true;
+                searchBtn.disabled = true;
+
+                const response = await fetch('./dicts/' + selectedDict);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load dictionary file: ' + response.status + ' ' + response.statusText);
+                }
+                
+                const text = await response.text();
+                
+                // Parse the dictionary file (one word per line)
+                currentDictionary = text
+                    .split('\n')
+                    .map(word => word.trim())
+                    .filter(word => word.length > 0)
+                    .sort();
+
+                dictionaryLoaded = true;
+                
+                // Update status
+                dictStatus.textContent = 'Dictionary loaded: ' + currentDictionary.length + ' words';
+                dictStatus.style.background = '#e8f5e8';
+                dictStatus.style.borderColor = '#4caf50';
+                
+                // Enable UI
+                patternInput.disabled = false;
+                searchBtn.disabled = false;
+                patternInput.focus();
+
+            } catch (error) {
+                console.error('Error loading dictionary:', error);
+                
+                // Show error status
+                dictStatus.textContent = 'Error loading dictionary: ' + error.message;
+                dictStatus.style.background = '#ffebee';
+                dictStatus.style.borderColor = '#f44336';
+                
+                currentDictionary = [];
+                dictionaryLoaded = false;
+                patternInput.disabled = true;
+                searchBtn.disabled = true;
+            }
+        }
+
+        // Main dispatch function
+        function processInput(input) {
+            // Check if dictionary is loaded
+            if (!dictionaryLoaded || currentDictionary.length === 0) {
+                throw new Error('Please select and load a dictionary first.');
+            }
+
+            // Validate input
+            if (!input || input.trim() === '') {
+                throw new Error('Please enter a pattern to search for.');
+            }
+
+            const pattern = input.trim().toLowerCase();
+            
+            // Check for valid characters (letters, periods, asterisks)
+            if (!/^[a-z.*]+$/.test(pattern)) {
+                throw new Error('Pattern can only contain letters, periods (.), and asterisks (*).');
+            }
+
+            // Dispatch to pattern matching function
+            return performSimplePatternMatch(pattern);
+        }
+
+        // Simple pattern matching function
+        function performSimplePatternMatch(pattern) {
+            const results = [];
+            
+            // Convert pattern to regex
+            let regex = pattern
+                .replace(/\./g, '[a-z]')  // . matches any single letter
+                .replace(/\*/g, '[a-z]*'); // * matches zero or more letters
+            
+            // Add anchors to match whole word
+            regex = '^' + regex + '$';
+            
+            const regexPattern = new RegExp(regex);
+            
+            // Search through current dictionary
+            for (const word of currentDictionary) {
+                if (regexPattern.test(word.toLowerCase())) {
+                    results.push(word);
+                }
+            }
+            
+            return results.sort(); // Return alphabetically sorted results
+        }
+
+        // UI function to handle search
+        function searchPattern() {
+            const input = document.getElementById('pattern').value;
+            const errorDiv = document.getElementById('error');
+            const resultsDiv = document.getElementById('results');
+            const resultsHeader = document.getElementById('resultsHeader');
+            const resultCount = document.getElementById('resultCount');
+
+            // Clear previous results and errors
+            errorDiv.style.display = 'none';
+            resultsDiv.style.display = 'none';
+            resultsHeader.style.display = 'none';
+
+            try {
+                const results = processInput(input);
+                
+                // Display results
+                if (results.length > 0) {
+                    resultsDiv.innerHTML = results.map(word => 
+                        '<div class="result-word">' + word + '</div>'
+                    ).join('');
+                    resultCount.textContent = results.length;
+                    resultsHeader.style.display = 'block';
+                    resultsDiv.style.display = 'grid';
+                } else {
+                    resultsDiv.innerHTML = '<div class="no-results">No matches found for the given pattern.</div>';
+                    resultsDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Allow Enter key to trigger search
+        document.getElementById('pattern').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchPattern();
+            }
+        });
+    </script>
+</body>
+</html>
