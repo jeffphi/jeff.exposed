@@ -190,7 +190,8 @@
                 • Use <strong>.</strong> (period) to match any single letter<br>
                 • Use <strong>*</strong> (asterisk) to match zero or more letters<br>
                 • Use <strong>[abc]</strong> to match any one letter from the list<br>
-                • Examples: "c.t" matches "cat", "cut" | "c[ao]t" matches "cat", "cot" | "h*se" matches "house", "horse"
+                • Start with <strong>;</strong> to include anagrams of matches<br>
+                • Examples: "c.t" matches "cat", "cut" | ";cat" matches "cat", "act" | "h*se" matches "house", "horse"
             </div>
             <button onclick="searchPattern()" id="searchBtn" disabled>Search</button>
             <div id="error" class="error" style="display: none;"></div>
@@ -289,7 +290,71 @@
             }
         }
 
-        // Main dispatch function
+        // Add this helper function to generate pattern anagrams
+        function generatePatternAnagrams(pattern) {
+            // Don't anagram wildcards or choice lists
+            const fixedPositions = new Set();
+            
+            // Find positions of special characters
+            for (let i = 0; i < pattern.length; i++) {
+                if (pattern[i] === '.' || pattern[i] === '*' || pattern[i] === '[') {
+                    fixedPositions.add(i);
+                    // For choice lists, skip to closing bracket
+                    if (pattern[i] === '[') {
+                        while (i < pattern.length && pattern[i] !== ']') {
+                            fixedPositions.add(i);
+                            i++;
+                        }
+                        fixedPositions.add(i); // add the closing bracket position
+                    }
+                }
+            }
+            
+            // Extract letters that can be anagrammed
+            const letters = [];
+            for (let i = 0; i < pattern.length; i++) {
+                if (!fixedPositions.has(i) && /[a-z]/.test(pattern[i])) {
+                    letters.push(pattern[i]);
+                }
+            }
+            
+            // Generate anagrams of the letters
+            const letterAnagrams = new Set();
+            function permute(arr, start = 0) {
+                if (start === arr.length) {
+                    letterAnagrams.add(arr.join(''));
+                    return;
+                }
+                
+                for (let i = start; i < arr.length; i++) {
+                    [arr[start], arr[i]] = [arr[i], arr[start]];
+                    permute(arr, start + 1);
+                    [arr[start], arr[i]] = [arr[i], arr[start]];
+                }
+            }
+            
+            permute(letters);
+            
+            // Reconstruct patterns with anagrammed letters
+            const patternAnagrams = new Set();
+            for (const letterAnagram of letterAnagrams) {
+                let letterIndex = 0;
+                let newPattern = '';
+                
+                for (let i = 0; i < pattern.length; i++) {
+                    if (fixedPositions.has(i)) {
+                        newPattern += pattern[i];
+                    } else if (/[a-z]/.test(pattern[i])) {
+                        newPattern += letterAnagram[letterIndex++];
+                    }
+                }
+                patternAnagrams.add(newPattern);
+            }
+            
+            return Array.from(patternAnagrams);
+        }
+
+        // Modify the processInput function
         function processInput(input) {
             // Check if dictionary is loaded
             if (!dictionaryLoaded || currentDictionary.length === 0) {
@@ -301,15 +366,32 @@
                 throw new Error('Please enter a pattern to search for.');
             }
 
-            const pattern = input.trim().toLowerCase();
+            let pattern = input.trim().toLowerCase();
+            const includeAnagrams = pattern.startsWith(';');
             
-            // Check for valid characters (letters, periods, asterisks)
+            // Remove semicolon if present
+            if (includeAnagrams) {
+                pattern = pattern.slice(1);
+            }
+            
+            // Check for valid characters
             if (!/^[a-z.*\[\]]+$/.test(pattern)) {
                 throw new Error('Pattern can only contain letters, periods (.), asterisks (*), and letter choices in square brackets ([]).');
             }
 
-            // Dispatch to pattern matching function
-            return performSimplePatternMatch(pattern);
+            // Get matches for the original pattern
+            let allMatches = new Set(performSimplePatternMatch(pattern));
+            
+            // If anagrams requested, get matches for all pattern anagrams
+            if (includeAnagrams) {
+                const patternAnagrams = generatePatternAnagrams(pattern);
+                for (const anagramPattern of patternAnagrams) {
+                    const anagramMatches = performSimplePatternMatch(anagramPattern);
+                    anagramMatches.forEach(match => allMatches.add(match));
+                }
+            }
+            
+            return Array.from(allMatches).sort();
         }
 
         // Simple pattern matching function
