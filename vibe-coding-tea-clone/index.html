@@ -188,7 +188,8 @@
                 <strong>Pattern Guide:</strong><br>
                 • Use <strong>.</strong> (period) to match any single letter<br>
                 • Use <strong>*</strong> (asterisk) to match zero or more letters<br>
-                • Examples: "c.t" matches "cat", "cut", "cot" | "h*se" matches "house", "horse", "hose"
+                • Use <strong>[abc]</strong> to match any one letter from the list<br>
+                • Examples: "c.t" matches "cat", "cut" | "c[ao]t" matches "cat", "cot" | "h*se" matches "house", "horse"
             </div>
             <button onclick="searchPattern()" id="searchBtn" disabled>Search</button>
             <div id="error" class="error" style="display: none;"></div>
@@ -302,8 +303,8 @@
             const pattern = input.trim().toLowerCase();
             
             // Check for valid characters (letters, periods, asterisks)
-            if (!/^[a-z.*]+$/.test(pattern)) {
-                throw new Error('Pattern can only contain letters, periods (.), and asterisks (*).');
+            if (!/^[a-z.*\[\]]+$/.test(pattern)) {
+                throw new Error('Pattern can only contain letters, periods (.), asterisks (*), and letter choices in square brackets ([]).');
             }
 
             // Dispatch to pattern matching function
@@ -315,23 +316,51 @@
             const results = [];
             
             // Convert pattern to regex
-            let regex = pattern
-                .replace(/\./g, '[a-z]')  // . matches any single letter
-                .replace(/\*/g, '[a-z]*'); // * matches zero or more letters
+            let regex = pattern;
+            
+            // Handle letter choice lists if present
+            if (regex.includes('[')) {
+                // Verify matching brackets
+                const openBrackets = (regex.match(/\[/g) || []).length;
+                const closeBrackets = (regex.match(/\]/g) || []).length;
+                
+                if (openBrackets !== closeBrackets) {
+                    throw new Error('Mismatched square brackets in pattern');
+                }
+                
+                // Validate letter choice contents
+                const bracketContents = regex.match(/\[([^\]]*)\]/g);
+                if (bracketContents) {
+                    for (const content of bracketContents) {
+                        if (!/^\[[a-z]+\]$/.test(content)) {
+                            throw new Error('Letter choice lists can only contain letters');
+                        }
+                    }
+                }
+            }
+            
+            // Handle wildcards (do this after choice list validation)
+            regex = regex
+                .replace(/\./g, '[a-z]')    // . matches any single letter
+                .replace(/\*/g, '[a-z]*');   // * matches zero or more letters
             
             // Add anchors to match whole word
             regex = '^' + regex + '$';
             
-            const regexPattern = new RegExp(regex);
-            
-            // Search through current dictionary
-            for (const word of currentDictionary) {
-                if (regexPattern.test(word.toLowerCase())) {
-                    results.push(word);
+            try {
+                const regexPattern = new RegExp(regex);
+                
+                // Search through current dictionary
+                for (const word of currentDictionary) {
+                    if (regexPattern.test(word.toLowerCase())) {
+                        results.push(word);
+                    }
                 }
+                
+                return results.sort(); // Return alphabetically sorted results
+            } catch (e) {
+                throw new Error('Invalid pattern syntax');
             }
-            
-            return results.sort(); // Return alphabetically sorted results
         }
 
         // UI function to handle search
