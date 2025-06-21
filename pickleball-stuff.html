@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pickleball Resources Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
+        }
+
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            display: flex;
+            align-items: center;
+        }
+
+        .section h2::before {
+            content: "🏓";
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .resource-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(248, 249, 250, 0.8);
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .resource-item:hover {
+            background: rgba(232, 245, 255, 0.9);
+            transform: translateX(5px);
+        }
+
+        .resource-link {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1em;
+            display: inline-block;
+            margin-bottom: 8px;
+            transition: color 0.3s ease;
+        }
+
+        .resource-link:hover {
+            color: #e74c3c;
+            text-decoration: underline;
+        }
+
+        .resource-description {
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .resource-bullets {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .resource-bullets li {
+            color: #666;
+            margin-bottom: 5px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .resource-bullets li::before {
+            content: "▸";
+            color: #3498db;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .section h2 {
+                font-size: 1.5em;
+            }
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            padding: 12px;
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-box:focus {
+            border-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏓 Pickleball Resources Hub</h1>
+            <p>Your curated collection of pickleball knowledge, tools, and community resources</p>
+            <input type="text" class="search-box" placeholder="Search resources..." id="searchBox">
+        </div>
+
+        <div class="section" data-section="learning">
+            <h2>Learning & Tutorials</h2>
+            
+            <div class="resource-item">
+                <a href="https://www.pickleballcentral.com/pages/pickleball-rules" class="resource-link" target="_blank">Official Pickleball Rules - Pickleball Central</a>
+                <div class="resource-description">
+                    Comprehensive guide to official pickleball rules and regulations from one of the most trusted sources in the sport.
+                </div>
+                <ul class="resource-bullets">
+                    <li>Complete rule book with latest updates</li>
+                    <li>Easy-to-understand explanations</li>
+                    <li>Downloadable PDF format available</li>
+                </ul>
+            </div>
+
+            <div class="resource-item">
+                <a href="#" class="resource-link" target="_blank">Beginner's Strategy Guide</a>
+                <div class="resource-description">
+                    Essential strategies and techniques for players just starting their pickleball journey.
+                </div>
+                <ul class="resource-bullets">
+                    <li>Basic positioning and footwork</li>
+                    <li>Serve and return fundamentals</li>
+                    <li>Court awareness tips</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" data-section="equipment">
+            <h2>Equipment & Gear</h2>
+            
+            <div class="resource-item">
+                <a href="#" class="resource-link" target="_blank">Paddle Buying Guide 2024</a>
+                <div class="resource-description">
+                    Detailed comparison of top pickleball paddles with pros, cons, and recommendations for different skill levels.
+                </div>
+                <ul class="resource-bullets">
+                    <li>Weight and grip size considerations</li>
+                    <li>Material comparison (composite vs. graphite)</li>
+                    <li>Budget-friendly vs. premium options</li>
+                </ul>
+            </div>
+
+            <div class="resource-item">
+                <a href="#" class="resource-link" target="_blank">Court Shoes Recommendations</a>
+                <div class="resource-description">
+                    Best footwear options for pickleball courts, focusing on comfort, support, and durability.
+                </div>
+            </div>
+        </div>
+
+        <div class="section" data-section="community">
+            <h2>Community & Events</h2>
+            
+            <div class="resource-item">
+                <a href="#" class="resource-link" target="_blank">Local Tournament Calendar</a>
+                <div class="resource-description">
+                    Stay updated with upcoming pickleball tournaments and events in your area.
+                </div>
+                <ul class="resource-bullets">
+                    <li>Tournament registration links</li>
+                    <li>Skill level categories</li>
+                    <li>Entry fees and prize information</li>
+                </ul>
+            </div>
+
+            <div class="resource-item">
+                <a href="#" class="resource-link" target="_blank">Pickleball Forums & Communities</a>
+                <div class="resource-description">
+                    Online communities where players share tips, organize games, and discuss all things pickleball.
+                </div>
+            </div>
+        </div>
+
+        <div class="section" data-section="training">
+            <h2>Training & Fitness</h2>
+            
+            <div class="resource-item">
+                <a href="#" class="resource-link" target="_blank">Pickleball-Specific Workouts</a>
+                <div class="resource-description">
+                    Fitness routines designed to improve your pickleball performance and prevent injuries.
+                </div>
+                <ul class="resource-bullets">
+                    <li>Agility and quick-step drills</li>
+                    <li>Core strengthening exercises</li>
+                    <li>Flexibility and stretching routines</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Last updated: <span id="lastUpdated"></span> | Resources curated with ❤️ for the pickleball community</p>
+        </div>
+    </div>
+
+    <script>
+        // Set last updated date
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleDateString();
+
+        // Simple search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach(section => {
+                const sectionText = section.textContent.toLowerCase();
+                if (sectionText.includes(searchTerm) || searchTerm === '') {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+        });
+
+        // Add some interactive effects
+        document.querySelectorAll('.resource-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 4px 15px rgba(52, 152, 219, 0.3)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.boxShadow = '';
+            });
+        });
+    </script>
+</body>
+</html>
