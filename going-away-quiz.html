@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donna & Jeff Trivia Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .quiz-header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question {
+            margin-bottom: 35px;
+            padding: 25px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+        }
+
+        .question:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.1);
+        }
+
+        .question.readonly {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .question.readonly:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .question-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .question-type {
+            display: inline-block;
+            background: #6366f1;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option:hover:not(.readonly) {
+            background: #f3f4f6;
+            border-color: #6366f1;
+        }
+
+        .option.readonly {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option.correct {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+
+        .option.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+
+        input[type="radio"],
+        input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .submit-container {
+            text-align: center;
+            padding: 20px 40px 40px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .score-display {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(251, 191, 36, 0.3);
+        }
+
+        .completion-message {
+            margin-top: 20px;
+            padding: 20px;
+            background: #e0f2fe;
+            color: #0277bd;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-content {
+                padding: 20px;
+            }
+
+            .question {
+                padding: 15px;
+            }
+
+            .quiz-header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>🧠 Trivia Challenge</h1>
+            <p>Test your knowledge of Donna & Jeff!</p>
+        </div>
+
+        <div class="quiz-content">
+            <form id="quizForm">
+
+                <div class="question">
+                    <div class="question-type">Single Choice</div>
+                    <div class="question-title">1. In which small town in Washington state did Jeff and Donna live after
+                        first moving here from California?</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="q1" value="birchbay">
+                            Birch Bay
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q1" value="centralia">
+                            Centralia
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q1" value="cleelum">
+                            Cle Elum
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q1" value="lynden">
+                            Lynden
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q1" value="porttownsend">
+                            Port Townsend
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-type">Multiple Choice</div>
+                    <div class="question-title">2. Which of the three following Seattle neighborhoods have Jeff and
+                        Donna lived in? (Select all that apply)</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="checkbox" name="q2" value="belltown">
+                            Belltown
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q2" value="capitolhill">
+                            Capitol Hill
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q2" value="lakecity">
+                            Lake City
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q2" value="laurelhurst">
+                            Laurelhurst
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q2" value="phinneyridge">
+                            Phinney Ridge
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q2" value="whitecenter">
+                            White Center
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-type">Single Choice</div>
+                    <div class="question-title">3. Which well-known Seattle chef did Jeff and Donna repeatedly run into
+                        around town in the mid to late 2010’s? This same chef also served Donna some roasted vegetables
+                        at an event for her 10th anniversary working at Microsoft, hosted at The Paramount.</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="q3" value="ethanstowell">
+                            Ethan Stowell
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q3" value="jerrytraunfeld">
+                            Jerry Traunfeld
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q3" value="mariahines">
+                            Maria Hines
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q3" value="reneeerickson">
+                            Renee Erickson
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q3" value="tomdouglas">
+                            Tom Douglas
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-type">Single Choice</div>
+                    <div class="question-title">4. Where in Seattle did Jeff and Donna get married?</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="q4" value="axisgallery">
+                            AXIS Gallery
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q4" value="canlis">
+                            Canlis
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q4" value="hatandboots">
+                            Hat & Boots
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q4" value="sorrentohotel">
+                            Sorrento Hotel
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q4" value="stmarkscathedral">
+                            St. Mark’s Cathedral
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-type">Multiple Choice</div>
+                    <div class="question-title">5. Which companies did Jeff and Donna work at in Seattle? (Select all
+                        that apply)</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="alaskaairlines">
+                            Alaska Airlines
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="amazon">
+                            Amazon
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="apple">
+                            Apple
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="expedia">
+                            Expedia
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="f5networks">
+                            F5 Networks
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="facebook">
+                            Facebook
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="gettyimages">
+                            Getty Images
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="google">
+                            Google
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="microsoft">
+                            Microsoft
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="nordstrom">
+                            Nordstrom
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="salesforce">
+                            Salesforce
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="starbucks">
+                            Starbucks
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="tableau">
+                            Tableau
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q5" value="zillow">
+                            Zillow
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-type">Single Choice</div>
+                    <div class="question-title">6. What was the most expensive concert that Jeff and Donna saw while in
+                        Seattle?</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="q6" value="ladygaga">
+                            Lady Gaga (Climate Pledge Arena)
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="pearljam">
+                            Pearl Jam (Climate Pledge Arena)
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="prince">
+                            Prince (Showbox)
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="queensofthestoneage">
+                            Queens of the Stone Age (Showbox)
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="taylorswift">
+                            Taylor Swift (Lumen Field)
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="u2">
+                            U2 (Climate Pledge Arena)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-type">Multiple Choice</div>
+                    <div class="question-title">7. Which of these are pets (permanent, not foster) that Donna and Jeff
+                        have had the pleasure of spending time with? (Select all that apply)</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="bounder">
+                            Bounder (dog)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="bubbles">
+                            Bubbles (goldfish)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="captainwhiskers">
+                            Captain Whiskers (guinea pig)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="cinnamon">
+                            Cinnamon (cat)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="daisy">
+                            Daisy (dog)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="max">
+                            Max (cat)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="muffin">
+                            Muffin (hamster)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="olive">
+                            Olive (bearded dragon)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="pepper">
+                            Pepper (dog)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="ratso">
+                            Ratso (rat)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="rusty">
+                            Rusty (hermit crab)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="sirhopsalot">
+                            Sir Hops-a-Lot (frog)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="turbo">
+                            Turbo (hedgehog)
+                        </label>
+                        <label class="option">
+                            <input type="checkbox" name="q7" value="zippy">
+                            Zippy (sugar glider)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="question">
+                    <div class="question-type">Single Choice</div>
+                    <div class="question-title">8. What Seattle-area dining institution have Jeff and Donna never eaten
+                        at?</div>
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="q8" value="13coins">
+                            13 Coins
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q8" value="bethscafe">
+                            Beth’s Cafe on Aurora
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q8" value="canlis">
+                            Canlis
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q8" value="dicksdrivein">
+                            Dick’s Drive-In (any location)
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q8" value="raysboathouse">
+                            Ray’s Boathouse
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q8" value="spaceneedle">
+                            Space Needle’s revolving restaurant
+                        </label>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="submit-container">
+            <button type="submit" id="submitBtn" class="submit-btn">Submit Quiz</button>
+            <div id="scoreDisplay" class="score-display" style="display: none;"></div>
+            <div id="completionMessage" class="completion-message" style="display: none;">
+                Quiz completed! Please show your score to Donna & Jeff.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Answer key
+        const answers = {
+            q1: 'birchbay',
+            q2: ['belltown', 'capitolhill', 'phinneyridge'],
+            q3: 'tomdouglas',
+            q4: 'canlis',
+            q5: ['f5networks', 'facebook', 'gettyimages', 'microsoft', 'nordstrom', 'salesforce', 'tableau'],
+            q6: 'prince',
+            q7: ['bounder', 'cinnamon', 'daisy', 'max', 'pepper', 'ratso'],
+            q8: 'dicksdrivein'
+        };
+
+        // State management
+        let quizState = {
+            completed: false,
+            score: 0,
+            userAnswers: {}
+        };
+
+        // Initialize quiz on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeQuiz();
+        });
+
+        function initializeQuiz() {
+            // Check if quiz was already completed
+            const completed = sessionStorage.getItem('quizCompleted');
+            if (completed === 'true') {
+                const savedScore = sessionStorage.getItem('quizScore');
+                const savedAnswers = JSON.parse(sessionStorage.getItem('userAnswers') || '{}');
+
+                quizState.completed = true;
+                quizState.score = parseInt(savedScore) || 0;
+                quizState.userAnswers = savedAnswers;
+
+                displayResults();
+                makeReadOnly();
+                restoreUserSelections();
+            } else {
+                // Set up submit button event listener
+                document.getElementById('submitBtn').addEventListener('click', handleSubmit);
+            }
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+
+            if (quizState.completed) return;
+
+            // Collect user answers
+            const formData = new FormData(document.getElementById('quizForm'));
+            const userAnswers = {};
+
+            // Process form data
+            for (let [key, value] of formData.entries()) {
+                if (!userAnswers[key]) {
+                    userAnswers[key] = [];
+                }
+                userAnswers[key].push(value);
+            }
+
+            // Convert single-item arrays to strings for radio buttons
+            for (let key in userAnswers) {
+                if (userAnswers[key].length === 1 && typeof answers[key] === 'string') {
+                    userAnswers[key] = userAnswers[key][0];
+                }
+            }
+
+            quizState.userAnswers = userAnswers;
+
+            // Calculate score
+            let score = 0;
+
+            for (let questionKey in answers) {
+                const correctAnswer = answers[questionKey];
+                const userAnswer = userAnswers[questionKey] || [];
+
+                if (Array.isArray(correctAnswer)) {
+                    // Multiple choice question
+                    const userSet = new Set(Array.isArray(userAnswer) ? userAnswer : []);
+                    const correctSet = new Set(correctAnswer);
+
+                    // Check each option
+                    const allOptions = [...document.querySelectorAll(`input[name="${questionKey}"]`)].map(input => input.value);
+
+                    for (let option of allOptions) {
+                        const userSelected = userSet.has(option);
+                        const shouldBeSelected = correctSet.has(option);
+
+                        if (userSelected && shouldBeSelected) {
+                            score += 1; // Correct selection
+                        } else if (userSelected && !shouldBeSelected) {
+                            score -= 1; // Incorrect selection
+                        }
+                        // No points for correct non-selection
+                    }
+                } else {
+                    // Single choice question
+                    if (userAnswer === correctAnswer) {
+                        score += 1; // Correct
+                    } else if (userAnswer && userAnswer !== correctAnswer) {
+                        score -= 1; // Incorrect selection
+                    }
+                    // No points for no selection
+                }
+            }
+
+            quizState.score = score;
+            quizState.completed = true;
+
+            // Save state to sessionStorage
+            sessionStorage.setItem('quizCompleted', 'true');
+            sessionStorage.setItem('quizScore', score.toString());
+            sessionStorage.setItem('userAnswers', JSON.stringify(userAnswers));
+
+            displayResults();
+            highlightAnswers();
+            makeReadOnly();
+        }
+
+        function displayResults() {
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const completionMessage = document.getElementById('completionMessage');
+
+            scoreDisplay.innerHTML = `Your Score: ${quizState.score} points`;
+            scoreDisplay.style.display = 'block';
+            completionMessage.style.display = 'block';
+
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = 'Quiz Completed';
+        }
+
+        function highlightAnswers() {
+            for (let questionKey in answers) {
+                const correctAnswer = answers[questionKey];
+                const userAnswer = quizState.userAnswers[questionKey] || [];
+                const inputs = document.querySelectorAll(`input[name="${questionKey}"]`);
+
+                inputs.forEach(input => {
+                    const option = input.closest('.option');
+                    const value = input.value;
+
+                    if (Array.isArray(correctAnswer)) {
+                        // Multiple choice
+                        const isCorrect = correctAnswer.includes(value);
+                        const wasSelected = Array.isArray(userAnswer) ? userAnswer.includes(value) : userAnswer === value;
+
+                        if (isCorrect) {
+                            option.classList.add('correct');
+                        } else if (wasSelected) {
+                            option.classList.add('incorrect');
+                        }
+                    } else {
+                        // Single choice
+                        const isCorrect = value === correctAnswer;
+                        const wasSelected = userAnswer === value;
+
+                        if (isCorrect) {
+                            option.classList.add('correct');
+                        } else if (wasSelected) {
+                            option.classList.add('incorrect');
+                        }
+                    }
+                });
+            }
+        }
+
+        function makeReadOnly() {
+            const inputs = document.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+            const options = document.querySelectorAll('.option');
+            const questions = document.querySelectorAll('.question');
+
+            inputs.forEach(input => {
+                input.disabled = true;
+            });
+
+            options.forEach(option => {
+                option.classList.add('readonly');
+            });
+
+            questions.forEach(question => {
+                question.classList.add('readonly');
+            });
+        }
+
+        function restoreUserSelections() {
+            for (let questionKey in quizState.userAnswers) {
+                const userAnswer = quizState.userAnswers[questionKey];
+                const inputs = document.querySelectorAll(`input[name="${questionKey}"]`);
+
+                inputs.forEach(input => {
+                    if (Array.isArray(userAnswer)) {
+                        input.checked = userAnswer.includes(input.value);
+                    } else {
+                        input.checked = input.value === userAnswer;
+                    }
+                });
+            }
+
+            highlightAnswers();
+        }
+    </script>
+</body>
+
+</html>
