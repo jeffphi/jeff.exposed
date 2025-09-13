@@ -190,6 +190,67 @@
             font-weight: 500;
         }
 
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-dialog {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1001;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .modal-title {
+            font-size: 1.8em;
+            color: #4f46e5;
+            margin-bottom: 20px;
+        }
+
+        .modal-score {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #10b981;
+            margin: 20px 0;
+        }
+
+        .modal-message {
+            font-size: 1.2em;
+            color: #4b5563;
+            margin-bottom: 20px;
+        }
+
+        .modal-button {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
         @media (max-width: 600px) {
             .quiz-content {
                 padding: 20px;
@@ -536,6 +597,15 @@
         </div>
     </div>
 
+    <div id="completionModal" class="modal-overlay">
+        <div class="modal-dialog">
+            <h2 class="modal-title">Quiz Complete! 🎉</h2>
+            <div class="modal-score" id="modalScore"></div>
+            <p class="modal-message">Please show these results to Donna & Jeff!</p>
+            <button class="modal-button" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
     <script>
         // Answer key
         const answers = {
@@ -662,13 +732,27 @@
         function displayResults() {
             const scoreDisplay = document.getElementById('scoreDisplay');
             const completionMessage = document.getElementById('completionMessage');
+            const modal = document.getElementById('completionModal');
+            const modalScore = document.getElementById('modalScore');
 
-            scoreDisplay.innerHTML = `Your Score: ${quizState.score} points`;
+            // Update both score displays
+            const scoreText = `Your Score: ${quizState.score} points`;
+            scoreDisplay.innerHTML = scoreText;
+            modalScore.innerHTML = scoreText;
+
+            // Show the modal
+            modal.style.display = 'block';
+
+            // Update the page behind the modal
             scoreDisplay.style.display = 'block';
             completionMessage.style.display = 'block';
-
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('submitBtn').textContent = 'Quiz Completed';
+        }
+
+        // Add this new function
+        function closeModal() {
+            document.getElementById('completionModal').style.display = 'none';
         }
 
         function highlightAnswers() {
