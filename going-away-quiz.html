@@ -563,10 +563,10 @@
 
         function initializeQuiz() {
             // Check if quiz was already completed
-            const completed = sessionStorage.getItem('quizCompleted');
+            const completed = localStorage.getItem('quizCompleted');
             if (completed === 'true') {
-                const savedScore = sessionStorage.getItem('quizScore');
-                const savedAnswers = JSON.parse(sessionStorage.getItem('userAnswers') || '{}');
+                const savedScore = localStorage.getItem('quizScore');
+                const savedAnswers = JSON.parse(localStorage.getItem('userAnswers') || '{}');
 
                 quizState.completed = true;
                 quizState.score = parseInt(savedScore) || 0;
@@ -619,20 +619,23 @@
                     const userSet = new Set(Array.isArray(userAnswer) ? userAnswer : []);
                     const correctSet = new Set(correctAnswer);
 
-                    // Check each option
-                    const allOptions = [...document.querySelectorAll(`input[name="${questionKey}"]`)].map(input => input.value);
-
-                    for (let option of allOptions) {
-                        const userSelected = userSet.has(option);
-                        const shouldBeSelected = correctSet.has(option);
-
-                        if (userSelected && shouldBeSelected) {
-                            score += 1; // Correct selection
-                        } else if (userSelected && !shouldBeSelected) {
-                            score -= 1; // Incorrect selection
+                    // For multiple choice, check both selected and unselected answers
+                    correctSet.forEach(correct => {
+                        if (!userSet.has(correct)) {
+                            // Missing a correct answer
+                            score -= 1;
                         }
-                        // No points for correct non-selection
-                    }
+                    });
+
+                    userSet.forEach(selected => {
+                        if (correctSet.has(selected)) {
+                            // Correct selection
+                            score += 1;
+                        } else {
+                            // Incorrect selection
+                            score -= 1;
+                        }
+                    });
                 } else {
                     // Single choice question
                     if (userAnswer === correctAnswer) {
@@ -640,17 +643,16 @@
                     } else if (userAnswer && userAnswer !== correctAnswer) {
                         score -= 1; // Incorrect selection
                     }
-                    // No points for no selection
                 }
             }
 
             quizState.score = score;
             quizState.completed = true;
 
-            // Save state to sessionStorage
-            sessionStorage.setItem('quizCompleted', 'true');
-            sessionStorage.setItem('quizScore', score.toString());
-            sessionStorage.setItem('userAnswers', JSON.stringify(userAnswers));
+            // Save state to localStorage
+            localStorage.setItem('quizCompleted', 'true');
+            localStorage.setItem('quizScore', score.toString());
+            localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
 
             displayResults();
             highlightAnswers();
@@ -684,9 +686,12 @@
                         const isCorrect = correctAnswer.includes(value);
                         const wasSelected = Array.isArray(userAnswer) ? userAnswer.includes(value) : userAnswer === value;
 
-                        if (isCorrect) {
+                        if (isCorrect && wasSelected) {
                             option.classList.add('correct');
-                        } else if (wasSelected) {
+                        } else if (isCorrect && !wasSelected) {
+                            // Correct answer that wasn't selected should be marked incorrect
+                            option.classList.add('incorrect');
+                        } else if (!isCorrect && wasSelected) {
                             option.classList.add('incorrect');
                         }
                     } else {
