@@ -902,7 +902,7 @@
             const modalScore = document.getElementById('modalScore');
 
             // Update both score displays
-            const scoreText = `Your Score: ${Number.isInteger(quizState.score) ? quizState.score : quizState.score.toFixed(1)}%`;
+            const scoreText = `Your Score: ${(quizState.score % 1 === 0) ? Math.round(quizState.score) : quizState.score.toFixed(1)}%`;
             scoreDisplay.innerHTML = scoreText;
             modalScore.innerHTML = scoreText;
 
