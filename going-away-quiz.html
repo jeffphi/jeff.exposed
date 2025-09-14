@@ -758,15 +758,15 @@
             const correctSet = new Set(correctAnswer);
 
             // Check for correct selections
+            let numCorrect = 0;
             correctSet.forEach(correct => {
                 if (userSet.has(correct)) {
-                    score += 4.1667; // Correct selection
-                } else {
-                    score -= 4.1667; // Missing a correct answer
-                }
+                    numCorrect++;
+                } 
             });
+            score = (numCorrect / correctSet.size) * 12.5;
 
-            return Math.max(0, Math.min(12.5, score)); // Clamp score between 0 and 12.5
+            return score;
         }
 
         function scoreQ3() {
@@ -802,15 +802,15 @@
             const correctSet = new Set(correctAnswer);
 
             // Check for correct selections
+            let numCorrect = 0;
             correctSet.forEach(correct => {
                 if (userSet.has(correct)) {
-                    score += 4.1667; // Correct selection
-                } else {
-                    score -= 4.1667; // Missing a correct answer
-                }
+                    numCorrect++;
+                } 
             });
+            score = (numCorrect / correctSet.size) * 12.5;
 
-            return Math.max(0, Math.min(12.5, score)); // Clamp score between 0 and 12.5
+            return score;
         }
 
         function scoreQ6() {
@@ -834,15 +834,15 @@
             const correctSet = new Set(correctAnswer);
 
             // Check for correct selections
+            let numCorrect = 0;
             correctSet.forEach(correct => {
                 if (userSet.has(correct)) {
-                    score += 4.1667; // Correct selection
-                } else {
-                    score -= 4.1667; // Missing a correct answer
-                }
+                    numCorrect++;
+                } 
             });
+            score = (numCorrect / correctSet.size) * 12.5;
 
-            return Math.max(0, Math.min(12.5, score)); // Clamp score between 0 and 12.5
+            return score;
         }
 
         function scoreQ8() {
