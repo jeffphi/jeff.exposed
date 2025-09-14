@@ -277,7 +277,7 @@
         <div class="quiz-content">
             <form id="quizForm">
 
-                <div class="question">
+                <div class="question" id="q1">
                     <div class="question-type">Single Choice</div>
                     <div class="question-title">1. In which small town in Washington state did Jeff and Donna live after
                         first moving here from California?</div>
@@ -305,7 +305,7 @@
                     </div>
                 </div>
 
-                <div class="question">
+                <div class="question" id="q2">
                     <div class="question-type">Multiple Choice</div>
                     <div class="question-title">2. Which of the three following Seattle neighborhoods have Jeff and
                         Donna lived in? (Choose 3)</div>
@@ -337,7 +337,7 @@
                     </div>
                 </div>
 
-                <div class="question">
+                <div class="question" id="q3">
                     <div class="question-type">Single Choice</div>
                     <div class="question-title">3. Which well-known Seattle chef did Jeff and Donna repeatedly run into
                         around town in the mid to late 2010’s? This same chef also served Donna some roasted vegetables
@@ -366,7 +366,7 @@
                     </div>
                 </div>
 
-                <div class="question">
+                <div class="question" id="q4">
                     <div class="question-type">Single Choice</div>
                     <div class="question-title">4. Where in Seattle did Jeff and Donna get married?</div>
                     <div class="options">
@@ -393,9 +393,10 @@
                     </div>
                 </div>
 
-                <div class="question">
+                <div class="question" id="q5">
                     <div class="question-type">Multiple Choice</div>
-                    <div class="question-title">5. Which companies did Jeff and Donna work at in Seattle? (Choose 7)</div>
+                    <div class="question-title">5. Which companies did Jeff and Donna work at in Seattle? (Choose 7)
+                    </div>
                     <div class="options">
                         <label class="option">
                             <input type="checkbox" name="q5" value="alaskaairlines">
@@ -456,7 +457,7 @@
                     </div>
                 </div>
 
-                <div class="question">
+                <div class="question" id="q6">
                     <div class="question-type">Single Choice</div>
                     <div class="question-title">6. What was the most expensive concert that Jeff and Donna saw while in
                         Seattle?</div>
@@ -488,7 +489,7 @@
                     </div>
                 </div>
 
-                <div class="question">
+                <div class="question" id="q7">
                     <div class="question-type">Multiple Choice</div>
                     <div class="question-title">7. Which of these are pets (permanent, not foster) that Donna and Jeff
                         have had the pleasure of spending time with? (Choose 6)</div>
@@ -552,7 +553,7 @@
                     </div>
                 </div>
 
-                <div class="question">
+                <div class="question" id="q8">
                     <div class="question-type">Single Choice</div>
                     <div class="question-title">8. What Seattle-area dining institution have Jeff and Donna never eaten
                         at?</div>
@@ -566,7 +567,7 @@
                             Beth’s Cafe on Aurora
                         </label>
                         <label class="option">
-                            <input type="radio" name="q8" value="canlis">
+                            <input type="radio" name="q8" value="canlisbad">
                             Canlis
                         </label>
                         <label class="option">
@@ -601,7 +602,16 @@
             <h2 class="modal-title">Quiz Complete! 🎉</h2>
             <div class="modal-score" id="modalScore"></div>
             <p class="modal-message">Please show these results to Donna & Jeff!</p>
-            <button class="modal-button" onclick="closeModal()">Close</button>
+            <button class="modal-button" onclick="closeCompletionModal()">Close</button>
+        </div>
+    </div>
+
+    <div id="errorModal" class="modal-overlay">
+        <div class="modal-dialog">
+            <h2 class="modal-title">Oops, not all questions answered!</h2>
+            <div class="modal-score" id="modalScore"></div>
+            <p class="modal-message">Please confirm the correct number of choices for each question and try again.</p>
+            <button class="modal-button" onclick="closeErrorModal()">Close</button>
         </div>
     </div>
 
@@ -655,6 +665,20 @@
 
             if (quizState.completed) return;
 
+            // Validate all questions answered
+            if (countCheckedRadios('q1') === 0 ||
+                countCheckedCheckboxes('q2') < 3 ||
+                countCheckedRadios('q3') === 0 ||
+                countCheckedRadios('q4') === 0 ||
+                countCheckedCheckboxes('q5') < 7 ||
+                countCheckedRadios('q6') === 0 ||
+                countCheckedCheckboxes('q7') < 6 ||
+                countCheckedRadios('q8') === 0) {
+                // Show error modal
+                document.getElementById('errorModal').style.display = 'block';
+                return;
+            }
+
             // Collect user answers
             const formData = new FormData(document.getElementById('quizForm'));
             const userAnswers = {};
@@ -679,6 +703,16 @@
             // Calculate score
             let score = 0;
 
+            score += scoreQ1();
+            score += scoreQ2();
+            score += scoreQ3();
+            score += scoreQ4();
+            score += scoreQ5();
+            score += scoreQ6();
+            score += scoreQ7();
+            score += scoreQ8();
+
+            /*
             for (let questionKey in answers) {
                 const correctAnswer = answers[questionKey];
                 const userAnswer = userAnswers[questionKey] || [];
@@ -714,6 +748,7 @@
                     }
                 }
             }
+            */
 
             quizState.score = score;
             quizState.completed = true;
@@ -728,6 +763,138 @@
             makeReadOnly();
         }
 
+        function countCheckedCheckboxes(questionId) {
+            const questionDiv = document.getElementById(questionId);
+            const checkedCheckboxes = questionDiv.querySelectorAll('input[type="checkbox"]:checked');
+            return checkedCheckboxes.length;
+        }
+
+        function countCheckedRadios(questionId) {
+            const questionDiv = document.getElementById(questionId);
+            const checkedRadios = questionDiv.querySelectorAll('input[type="radio"]:checked');
+            return checkedRadios.length;
+        }
+
+        function scoreQ1() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q1'];
+            const correctAnswer = answers['q1'];
+
+            if (userAnswer === correctAnswer) {
+                score += 12.5; 
+            } 
+
+            return score;
+        }
+
+        function scoreQ2() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q2'] || [];
+            const correctAnswer = answers['q2'];
+
+            const userSet = new Set(userAnswer);
+            const correctSet = new Set(correctAnswer);
+
+            // Check for correct selections
+            correctSet.forEach(correct => {
+                if (userSet.has(correct)) {
+                    score += 4.1667; // Correct selection
+                } else {
+                    score -= 4.1667; // Missing a correct answer
+                }
+            });
+
+            return Math.max(0, Math.min(12.5, score)); // Clamp score between 0 and 12.5
+        }
+
+        function scoreQ3() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q3'];
+            const correctAnswer = answers['q3'];
+
+            if (userAnswer === correctAnswer) {
+                score += 12.5; 
+            } 
+
+            return score;
+        }
+
+         function scoreQ4() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q4'];
+            const correctAnswer = answers['q4'];
+
+            if (userAnswer === correctAnswer) {
+                score += 12.5; 
+            } 
+
+            return score;
+        }
+
+        function scoreQ5() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q5'] || [];
+            const correctAnswer = answers['q5'];
+
+            const userSet = new Set(userAnswer);
+            const correctSet = new Set(correctAnswer);
+
+            // Check for correct selections
+            correctSet.forEach(correct => {
+                if (userSet.has(correct)) {
+                    score += 4.1667; // Correct selection
+                } else {
+                    score -= 4.1667; // Missing a correct answer
+                }
+            });
+
+            return Math.max(0, Math.min(12.5, score)); // Clamp score between 0 and 12.5
+        }
+
+        function scoreQ6() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q6'];
+            const correctAnswer = answers['q6'];
+
+            if (userAnswer === correctAnswer) {
+                score += 12.5; 
+            } 
+
+            return score;
+        }
+
+        function scoreQ7() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q7'] || [];
+            const correctAnswer = answers['q7'];
+
+            const userSet = new Set(userAnswer);
+            const correctSet = new Set(correctAnswer);
+
+            // Check for correct selections
+            correctSet.forEach(correct => {
+                if (userSet.has(correct)) {
+                    score += 4.1667; // Correct selection
+                } else {
+                    score -= 4.1667; // Missing a correct answer
+                }
+            });
+
+            return Math.max(0, Math.min(12.5, score)); // Clamp score between 0 and 12.5
+        }
+
+        function scoreQ8() {
+            let score = 0;
+            const userAnswer = quizState.userAnswers['q8'];
+            const correctAnswer = answers['q8'];
+
+            if (userAnswer === correctAnswer) {
+                score += 12.5; 
+            } 
+
+            return score;
+        }
+
         function displayResults() {
             const scoreDisplay = document.getElementById('scoreDisplay');
             const completionMessage = document.getElementById('completionMessage');
@@ -735,7 +902,7 @@
             const modalScore = document.getElementById('modalScore');
 
             // Update both score displays
-            const scoreText = `Your Score: ${quizState.score} points`;
+            const scoreText = `Your Score: ${Number.isInteger(quizState.score) ? quizState.score : quizState.score.toFixed(1)}%`;
             scoreDisplay.innerHTML = scoreText;
             modalScore.innerHTML = scoreText;
 
@@ -749,9 +916,12 @@
             document.getElementById('submitBtn').textContent = 'Quiz Completed';
         }
 
-        // Add this new function
-        function closeModal() {
+        function closeCompletionModal() {
             document.getElementById('completionModal').style.display = 'none';
+        }
+
+        function closeErrorModal() {
+            document.getElementById('errorModal').style.display = 'none';
         }
 
         function highlightAnswers() {
@@ -772,7 +942,7 @@
                         if (isCorrect && wasSelected) {
                             option.classList.add('correct');
                         } else if (isCorrect && !wasSelected) {
-                            option.classList.add('incorrect');
+                            option.classList.add('correct');
                         } else if (!isCorrect && wasSelected) {
                             option.classList.add('incorrect');
                         }
@@ -784,7 +954,7 @@
                         if (isCorrect && wasSelected) {
                             option.classList.add('correct');
                         } else if (isCorrect && !wasSelected) {
-                            option.classList.add('incorrect');
+                            option.classList.add('correct');
                         } else if (wasSelected) {
                             option.classList.add('incorrect');
                         }
