@@ -712,44 +712,6 @@
             score += scoreQ7();
             score += scoreQ8();
 
-            /*
-            for (let questionKey in answers) {
-                const correctAnswer = answers[questionKey];
-                const userAnswer = userAnswers[questionKey] || [];
-
-                if (Array.isArray(correctAnswer)) {
-                    // Multiple choice question
-                    const userSet = new Set(Array.isArray(userAnswer) ? userAnswer : []);
-                    const correctSet = new Set(correctAnswer);
-
-                    // For multiple choice, check both selected and unselected answers
-                    correctSet.forEach(correct => {
-                        if (!userSet.has(correct)) {
-                            // Missing a correct answer
-                            score -= 1;
-                        }
-                    });
-
-                    userSet.forEach(selected => {
-                        if (correctSet.has(selected)) {
-                            // Correct selection
-                            score += 1;
-                        } else {
-                            // Incorrect selection
-                            score -= 1;
-                        }
-                    });
-                } else {
-                    // Single choice question
-                    if (userAnswer === correctAnswer) {
-                        score += 1; // Correct
-                    } else if (userAnswer && userAnswer !== correctAnswer) {
-                        score -= 1; // Incorrect selection
-                    }
-                }
-            }
-            */
-
             quizState.score = score;
             quizState.completed = true;
 
