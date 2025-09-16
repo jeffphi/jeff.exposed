@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navy Memo Book Diary</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Landing Page Styles */
+        .landing-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .landing-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 800px;
+            backdrop-filter: blur(10px);
+        }
+
+        .landing-title {
+            font-size: 2.5rem;
+            color: #2c5530;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .landing-subtitle {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .memo-book-preview {
+            width: 300px;
+            height: 400px;
+            background: linear-gradient(45deg, #4a6741, #5d7a54);
+            margin: 2rem auto;
+            border-radius: 8px 8px 4px 4px;
+            box-shadow: 
+                0 10px 20px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            position: relative;
+            transform: perspective(800px) rotateX(15deg);
+        }
+
+        .memo-book-preview::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20px;
+            right: 20px;
+            height: 15px;
+            background: #333;
+            border-radius: 2px 2px 0 0;
+            box-shadow: inset 0 -2px 4px rgba(0,0,0,0.5);
+        }
+
+        .memo-book-preview::after {
+            content: 'MEMO\ABOOK';
+            white-space: pre;
+            position: absolute;
+            top: 50px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .start-button {
+            background: linear-gradient(45deg, #4a6741, #5d7a54);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            background: linear-gradient(45deg, #5d7a54, #4a6741);
+        }
+
+        /* Memo Book Styles */
+        .memo-book-container {
+            display: none;
+            min-height: 100vh;
+            padding: 2rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .memo-book {
+            width: 400px;
+            height: 600px;
+            background: linear-gradient(45deg, #4a6741, #5d7a54);
+            border-radius: 12px 12px 6px 6px;
+            box-shadow: 
+                0 15px 30px rgba(0,0,0,0.4),
+                inset 0 2px 0 rgba(255,255,255,0.2);
+            position: relative;
+            transform: perspective(1000px) rotateX(10deg);
+        }
+
+        .binding {
+            position: absolute;
+            top: 0;
+            left: 30px;
+            right: 30px;
+            height: 20px;
+            background: linear-gradient(to bottom, #333, #222);
+            border-radius: 3px 3px 0 0;
+            box-shadow: 
+                inset 0 -3px 6px rgba(0,0,0,0.6),
+                0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .binding::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #666, transparent);
+            transform: translateY(-50%);
+        }
+
+        .page-stack {
+            position: absolute;
+            top: 25px;
+            left: 20px;
+            right: 20px;
+            bottom: 20px;
+            background: #f8f6f0;
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8f6f0;
+            padding: 30px 25px;
+            overflow-y: auto;
+            transform-origin: top center;
+            transition: transform 0.6s ease-in-out;
+            backface-visibility: hidden;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .page.current {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .page.flipped {
+            transform: rotateX(-180deg);
+            opacity: 0;
+        }
+
+        .page-content {
+            height: 100%;
+            position: relative;
+        }
+
+        .page-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 24px,
+                    #d4d4d4 24px,
+                    #d4d4d4 25px
+                );
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+
+
+        .diary-entry {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .entry-date {
+            color: #c0392b;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-decoration: underline;
+        }
+
+        .entry-text {
+            color: #2c3e50;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .control-btn {
+            background: rgba(74, 103, 65, 0.9);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(93, 122, 84, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(74, 103, 65, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            background: rgba(74, 103, 65, 0.9);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(93, 122, 84, 0.9);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .memo-book {
+                width: 90vw;
+                max-width: 350px;
+                height: 500px;
+            }
+            
+            .landing-content {
+                margin: 1rem;
+                padding: 2rem;
+            }
+            
+            .memo-book-preview {
+                width: 250px;
+                height: 330px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div class="landing-page" id="landingPage">
+        <div class="landing-content">
+            <h1 class="landing-title">Letters from the Sea</h1>
+            <p class="landing-subtitle">
+                During my time in the US Navy, I carried a small green memo notebook where I wrote diary entries and love letters. 
+                This digital recreation lets you flip through those pages and experience the intimate thoughts of a sailor far from home.
+            </p>
+            
+            <div class="memo-book-preview"></div>
+            
+            <p style="margin-bottom: 2rem; color: #666; font-style: italic;">
+                Click below to open the virtual memo book and discover the stories within...
+            </p>
+            
+            <button class="start-button" onclick="openMemoBook()">Open Memo Book</button>
+        </div>
+    </div>
+
+    <!-- Memo Book -->
+    <div class="memo-book-container" id="memoBookContainer">
+        <button class="back-btn" onclick="backToLanding()">← Back</button>
+        
+        <div class="page-indicator" id="pageIndicator">Page 1 of 5</div>
+        
+        <div class="memo-book">
+            <div class="binding"></div>
+            <div class="page-stack">
+                <!-- Page 1 -->
+                <div class="page" id="page1">
+                    <div class="page-content">
+                        <div class="page-lines"></div>
+                        <div class="red-margin"></div>
+                        <div class="diary-entry">
+                            <div class="entry-date">March 15th, 1995</div>
+                            <div class="entry-text">
+                                Dear Sarah,<br><br>
+                                
+                                Another day at sea. The Pacific stretches endlessly in all directions, and I find myself thinking of you constantly. The way you smiled when I left port still haunts my dreams.<br><br>
+                                
+                                Today we had general quarters drill at 0600. The alarm bells always remind me of how far I am from your gentle voice calling my name in the morning.<br><br>
+                                
+                                I miss the simple things - coffee together on Sunday mornings, your laugh when I told terrible jokes, the way you'd steal my Navy sweater because it smelled like me.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 2 -->
+                <div class="page" id="page2">
+                    <div class="page-content">
+                        <div class="page-lines"></div>
+                        <div class="red-margin"></div>
+                        <div class="diary-entry">
+                            <div class="entry-date">March 18th, 1995</div>
+                            <div class="entry-text">
+                                The stars are incredible out here, away from all the city lights. Last night I spent my watch thinking about that time we laid on the beach and you pointed out constellations I'd never noticed.<br><br>
+                                
+                                Got your letter today! The mail call always makes my heart race - hearing my name called means another piece of home has found its way across the ocean to me.
+                            </div>
+                        </div>
+                        
+                        <div class="diary-entry">
+                            <div class="entry-date">March 20th, 1995</div>
+                            <div class="entry-text">
+                                Storm today. Big swells, rain coming sideways. The ship rocks like a cradle, but not the gentle kind that soothes you to sleep. Makes me think about solid ground and your steady presence.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 3 -->
+                <div class="page" id="page3">
+                    <div class="page-content">
+                        <div class="page-lines"></div>
+                        <div class="red-margin"></div>
+                        <div class="diary-entry">
+                            <div class="entry-date">March 25th, 1995</div>
+                            <div class="entry-text">
+                                Today marks one month since we left port. One month since I've held you, kissed you, heard your voice without static from the radio room.<br><br>
+                                
+                                The guys in my berthing have started calling me "Romeo" because I'm always writing in this little green book. If they only knew these aren't just letters - they're lifelines. Each word connects me back to the life I'm fighting to return to.<br><br>
+                                
+                                I dream of the day I can close this notebook forever, not because I don't want to write to you, but because I'll be able to whisper these words directly in your ear instead.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 4 -->
+                <div class="page" id="page4">
+                    <div class="page-content">
+                        <div class="page-lines"></div>
+                        <div class="red-margin"></div>
+                        <div class="diary-entry">
+                            <div class="entry-date">March 28th, 1995</div>
+                            <div class="entry-text">
+                                We're heading toward port for resupply - still weeks away, but the thought of solid ground and a phone call to you keeps me going through these long watches.<br><br>
+                                
+                                I've been thinking about what I want to say when I call. There's so much stored up in my heart, so many moments I've wanted to share with you. The sunset that painted the entire ocean gold. The dolphins that raced alongside our ship. The way the moon creates a silver path on the water that seems to lead straight home to you.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Page 5 -->
+                <div class="page" id="page5">
+                    <div class="page-content">
+                        <div class="page-lines"></div>
+                        <div class="red-margin"></div>
+                        <div class="diary-entry">
+                            <div class="entry-date">April 2nd, 1995</div>
+                            <div class="entry-text">
+                                This may be my last entry in this little green book for a while. Tomorrow we make port, and I'll finally get to hear your voice again.<br><br>
+                                
+                                These pages have been my companion through lonely nights and endless days. Every word written here was written with love, hope, and the absolute certainty that what we have is worth every mile of ocean between us.<br><br>
+                                
+                                Until I hold you again...<br><br>
+                                
+                                Forever yours,<br>
+                                Your sailor
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="prevBtn" onclick="previousPage()">← Previous</button>
+            <button class="control-btn" id="nextBtn" onclick="nextPage()">Next →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 5;
+
+        function openMemoBook() {
+            document.getElementById('landingPage').style.display = 'none';
+            document.getElementById('memoBookContainer').style.display = 'flex';
+            updatePageDisplay();
+        }
+
+        function backToLanding() {
+            document.getElementById('memoBookContainer').style.display = 'none';
+            document.getElementById('landingPage').style.display = 'flex';
+            currentPage = 1;
+            resetPages();
+        }
+
+        function resetPages() {
+            for (let i = 1; i <= totalPages; i++) {
+                const page = document.getElementById(`page${i}`);
+                page.classList.remove('flipped', 'current');
+            }
+            document.getElementById('page1').classList.add('current');
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                document.getElementById(`page${currentPage}`).classList.remove('current');
+                document.getElementById(`page${currentPage}`).classList.add('flipped');
+                currentPage++;
+                document.getElementById(`page${currentPage}`).classList.add('current');
+                updatePageDisplay();
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                document.getElementById(`page${currentPage}`).classList.remove('current');
+                currentPage--;
+                document.getElementById(`page${currentPage}`).classList.remove('flipped');
+                document.getElementById(`page${currentPage}`).classList.add('current');
+                updatePageDisplay();
+            }
+        }
+
+        function updatePageDisplay() {
+            document.getElementById('pageIndicator').textContent = `Page ${currentPage} of ${totalPages}`;
+            
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            resetPages();
+            updatePageDisplay();
+        });
+    </script>
+</body>
+</html>
