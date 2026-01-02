@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Meat - Premium video meating</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: white;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Landing Page Styles */
+    .landing-page {
+      min-height: 100vh;
+      background: white;
+    }
+
+    .header {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      color: #374151;
+      font-weight: 400;
+    }
+
+    .header-buttons {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-support {
+      color: #4b5563;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+
+    .btn-support:hover {
+      color: #1f2937;
+    }
+
+    .btn-signin {
+      padding: 0.5rem 1rem;
+      color: #2563eb;
+      background: none;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+
+    .btn-signin:hover {
+      background: #eff6ff;
+    }
+
+    .main-content {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 4rem 1.5rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    @media (max-width: 768px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .hero-title {
+      font-size: 3rem;
+      font-weight: 400;
+      color: #111827;
+      margin-bottom: 1rem;
+    }
+
+    .hero-description {
+      font-size: 1.25rem;
+      color: #4b5563;
+      margin-bottom: 2rem;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn-primary {
+      padding: 0.75rem 1.5rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 1rem;
+    }
+
+    .btn-secondary:hover {
+      background: #f9fafb;
+    }
+
+    .hero-image {
+      aspect-ratio: 16/9;
+      background: #f3f4f6;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-image svg {
+      width: 8rem;
+      height: 8rem;
+      color: #d1d5db;
+    }
+
+    .features {
+      margin-top: 6rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .feature-icon.blue {
+      background: #dbeafe;
+    }
+
+    .feature-icon.red {
+      background: #fee2e2;
+    }
+
+    .feature-icon.green {
+      background: #d1fae5;
+    }
+
+    .feature-icon svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    .feature-icon.blue svg {
+      color: #2563eb;
+    }
+
+    .feature-icon.red svg {
+      color: #dc2626;
+    }
+
+    .feature-icon.green svg {
+      color: #059669;
+    }
+
+    .feature-title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: #111827;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+      color: #4b5563;
+    }
+
+    /* Meeting Page Styles */
+    .meeting-page {
+      min-height: 100vh;
+      background: #111827;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meeting-header {
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .meeting-code {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .meeting-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      position: relative;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      max-width: 64rem;
+      aspect-ratio: 16/9;
+      background: black;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    #meetingVideo {
+      display: none;
+    }
+
+    #demoImage {
+      display: none;
+    }
+
+    #meetingCanvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .name-tag {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      background: rgba(17, 24, 39, 0.8);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+    }
+
+    .demo-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(37, 99, 235, 0.9);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+
+    .meeting-controls {
+      background: white;
+      border-top: 1px solid #e5e7eb;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .control-btn {
+      padding: 1rem;
+      border-radius: 9999px;
+      background: #e5e7eb;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .control-btn:hover {
+      background: #d1d5db;
+    }
+
+    .control-btn.danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .control-btn.danger:hover {
+      background: #b91c1c;
+    }
+
+    .control-btn svg {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Landing Page -->
+  <div id="landingPage" class="landing-page">
+    <div class="header">
+      <div class="logo-container">
+        <svg width="40" height="40" viewBox="0 0 192 192" fill="none">
+          <path d="M200 120L152 152V40L200 72V120Z" fill="#00832d"/>
+          <path d="M152 152V40H40V152H152Z" fill="#0066da"/>
+          <path d="M152 88L200 120V72L152 40V88Z" fill="#e94235"/>
+          <path d="M56 72H96V120H56V72Z" fill="#00ac47"/>
+        </svg>
+        <span class="logo-text">Google Meat</span>
+      </div>
+      <div class="header-buttons">
+        <button class="btn-support">Support</button>
+        <button class="btn-signin">Sign in</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="hero-grid">
+        <div>
+          <h1 class="hero-title">Premium video meating for everyone</h1>
+          <p class="hero-description">
+            We re-engineered the service that we built for secure business meating, 
+            Google Meat, to make it free and available for all.
+          </p>
+          <div class="hero-buttons">
+            <button class="btn-primary" onclick="startMeeting()">New meating</button>
+            <button class="btn-secondary">Enter a code</button>
+          </div>
+        </div>
+        
+        <div class="hero-image">
+          <svg fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon blue">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Get a link you can share</h3>
+          <p class="feature-description">Click New meating to get a link you can send to people you want to meat with</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon red">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Your meating is safe</h3>
+          <p class="feature-description">No one can join a meating unless invited or admitted by the host</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon green">
+            <svg fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+            </svg>
+          </div>
+          <h3 class="feature-title">Premium meating quality</h3>
+          <p class="feature-description">Enjoy crisp HD video and clear audio with adjustable marbling settings</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Meeting Page -->
+  <div id="meetingPage" class="meeting-page hidden">
+    <div class="meeting-header">
+      <div class="logo-container">
+        <svg width="32" height="32" viewBox="0 0 192 192" fill="none">
+          <path d="M200 120L152 152V40L200 72V120Z" fill="#00832d"/>
+          <path d="M152 152V40H40V152H152Z" fill="#0066da"/>
+          <path d="M152 88L200 120V72L152 40V88Z" fill="#e94235"/>
+          <path d="M56 72H96V120H56V72Z" fill="#00ac47"/>
+        </svg>
+        <span class="logo-text">Google Meat</span>
+      </div>
+      <div class="meeting-code">mea-ting-code-123</div>
+    </div>
+
+    <div class="meeting-main">
+      <div class="video-container">
+        <video id="meetingVideo" autoplay playsinline muted></video>
+        <img id="demoImage" alt="Demo face">
+        <canvas id="meetingCanvas"></canvas>
+        <div class="name-tag">You (Medium Rare)</div>
+        <div id="demoBadge" class="demo-badge hidden">Demo Mode - Webcam not available</div>
+      </div>
+    </div>
+
+    <div class="meeting-controls">
+      <button class="control-btn">
+        <svg fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+          <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+        </svg>
+      </button>
+      
+      <button class="control-btn">
+        <svg fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+        </svg>
+      </button>
+
+      <button class="control-btn danger" onclick="endMeeting()">
+        <svg fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.68-1.36-2.66-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>
+        </svg>
+      </button>
+
+      <button class="control-btn">
+        <svg fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let stream = null;
+    let useDemoMode = false;
+    let animationId = null;
+
+    const landingPage = document.getElementById('landingPage');
+    const meetingPage = document.getElementById('meetingPage');
+    const video = document.getElementById('meetingVideo');
+    const canvas = document.getElementById('meetingCanvas');
+    const ctx = canvas.getContext('2d');
+    const demoImage = document.getElementById('demoImage');
+    const demoBadge = document.getElementById('demoBadge');
+
+    // Create demo image
+    demoImage.src = "data:image/svg+xml,%3Csvg width='640' height='480' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='640' height='480' fill='%234a5568'/%3E%3Ccircle cx='320' cy='200' r='80' fill='%23cbd5e0'/%3E%3Ccircle cx='280' cy='180' r='15' fill='%232d3748'/%3E%3Ccircle cx='360' cy='180' r='15' fill='%232d3748'/%3E%3Cpath d='M 260 260 Q 320 300 380 260' stroke='%232d3748' stroke-width='4' fill='none'/%3E%3C/svg%3E";
+
+    function startMeeting() {
+      landingPage.classList.add('hidden');
+      meetingPage.classList.remove('hidden');
+      startWebcam();
+    }
+
+    function endMeeting() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      meetingPage.classList.add('hidden');
+      landingPage.classList.remove('hidden');
+      useDemoMode = false;
+      demoBadge.classList.add('hidden');
+    }
+
+    async function startWebcam() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: true, 
+          audio: false 
+        });
+        video.srcObject = stream;
+        await video.play();
+        useDemoMode = false;
+        demoBadge.classList.add('hidden');
+        startDrawing();
+      } catch (err) {
+        console.error('Error accessing webcam:', err);
+        useDemoMode = true;
+        demoBadge.classList.remove('hidden');
+        // Wait for demo image to load
+        if (demoImage.complete) {
+          startDrawing();
+        } else {
+          demoImage.onload = startDrawing;
+        }
+      }
+    }
+
+    function startDrawing() {
+      function drawFrame() {
+        let sourceElement = null;
+        
+        // Use webcam video if available, otherwise use demo image
+        if (!useDemoMode && stream && video.readyState === video.HAVE_ENOUGH_DATA) {
+          sourceElement = video;
+        } else if (useDemoMode && demoImage.complete) {
+          sourceElement = demoImage;
+        }
+        
+        if (sourceElement) {
+          // Set canvas size to match source
+          const width = sourceElement.videoWidth || sourceElement.width;
+          const height = sourceElement.videoHeight || sourceElement.height;
+          
+          if (canvas.width !== width || canvas.height !== height) {
+            canvas.width = width;
+            canvas.height = height;
+          }
+          
+          // Draw the source frame
+          ctx.drawImage(sourceElement, 0, 0, canvas.width, canvas.height);
+          
+          // Create t-bone steak overlay effect
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const data = imageData.data;
+          
+          // Apply a reddish meat tint
+          for (let i = 0; i < data.length; i += 4) {
+            data[i] = Math.min(255, data[i] * 1.3);     // More red
+            data[i + 1] = data[i + 1] * 0.7;            // Less green
+            data[i + 2] = data[i + 2] * 0.7;            // Less blue
+          }
+          
+          ctx.putImageData(imageData, 0, 0);
+          
+          // Draw t-bone steak texture overlay
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = '#8B4513';
+          
+          // Simple marbling effect
+          for (let i = 0; i < 20; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            const size = Math.random() * 50 + 20;
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          
+          ctx.globalAlpha = 1.0;
+        }
+        
+        animationId = requestAnimationFrame(drawFrame);
+      }
+      
+      drawFrame();
+    }
+  </script>
+</body>
+</html>
