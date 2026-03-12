@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Redirecting...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+  <p style="font-family:sans-serif;text-align:center;margin-top:40px">
+    Redirecting back to Club SMS...
+  </p>
+  <script>
+    // Forward all query params (including the OAuth code) to the app's custom scheme.
+    // Hosted at an https:// URL so WildApricot accepts it as a redirect domain.
+    window.location.href = 'club-sms://auth' + window.location.search;
+  </script>
+</body>
+</html>
+
