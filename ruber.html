@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUber - Disrupting the Ravnaas Driveway</title>
+    <style>
+        :root {
+            --primary: #00ff66;
+            --dark: #0f1115;
+            --card-bg: #1a1d24;
+            --text: #e2e8f0;
+            --accent: #ff007f;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, #000000, #131722);
+            padding: 3rem 2rem;
+            text-align: center;
+            border-bottom: 3px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header h1 {
+            font-size: 4rem;
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: -2px;
+            color: #ffffff;
+        }
+
+        header h1 span {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #a0aec0;
+            max-width: 600px;
+            margin: 1rem auto 0;
+        }
+
+        .badge {
+            position: absolute;
+            top: 20px;
+            right: -35px;
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 3rem;
+            transform: rotate(45deg);
+            font-size: 0.8rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            border-bottom: 1px solid #2d3748;
+            padding-bottom: 0.5rem;
+            color: #ffffff;
+            margin-top: 3rem;
+        }
+
+        /* Fleet Grid */
+        .fleet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .vehicle-card {
+            background-color: var(--card-bg);
+            border: 1px solid #2d3748;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+        }
+
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .vehicle-card h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .driver-tag {
+            font-size: 0.8rem;
+            background: #2d3748;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            color: var(--primary);
+        }
+
+        .specs {
+            list-style: none;
+            padding: 0;
+            font-size: 0.9rem;
+            color: #a0aec0;
+        }
+
+        .specs li {
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .specs li::before {
+            content: "⚡";
+            margin-right: 0.5rem;
+        }
+
+        /* Calculator Section */
+        .calc-box {
+            background: linear-gradient(180deg, var(--card-bg), #13151a);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid #2d3748;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #a0aec0;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.8rem;
+            background: #0f1115;
+            border: 1px solid #4a5568;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--primary);
+            color: #000000;
+            border: none;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #00cc52;
+        }
+
+        #fare-result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0, 255, 102, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 0 6px 6px 0;
+            display: none;
+        }
+
+        /* Reviews Section */
+        .review-card {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 12px 12px 0;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .reviewer-name {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .hex-rating {
+            background: #2d3748;
+            color: var(--accent);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .review-text {
+            font-style: italic;
+            color: #cbd5e0;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #718096;
+            font-size: 0.85rem;
+            border-top: 1px solid #2d3748;
+            margin-top: 4rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="badge">BETA v0.F</div>
+        <h1><span>R</span>Uber</h1>
+        <p>Why use rideshare giants when you can peer-pressure two specific guys named Doyle and Hans to come pick you up in whatever they have clean?</p>
+    </header>
+
+    <main>
+        
+        <h2>The Ravnaas Motor Pool</h2>
+        <p>Vehicles are deployed based entirely on who is currently awake, who has battery charge, and who is willing to pause their day.</p>
+        
+        <div class="fleet-grid">
+            <!-- Vehicle 1 -->
+            <div class="vehicle-card">
+                <h3>RUber Quiet <span class="driver-tag">Doyle</span></h3>
+                <p><strong>Tesla Sedan</strong></p>
+                <ul class="specs">
+                    <li>0-60 mph faster than your grocery list</li>
+                    <li>Guaranteed autopilot side-eye from the driver</li>
+                    <li>Zero emissions, maximum luxury floor mats</li>
+                </ul>
+            </div>
+
+            <!-- Vehicle 2 -->
+            <div class="vehicle-card">
+                <h3>RUber Loud <span class="driver-tag">Hans</span></h3>
+                <p><strong>Harley Davidson</strong></p>
+                <ul class="specs">
+                    <li>Exhaust note alerts entire zip code of arrival</li>
+                    <li>Passenger must hold on for dear life</li>
+                    <li>Helmet provided (size: slightly too tight)</li>
+                </ul>
+            </div>
+
+            <!-- Vehicle 3 -->
+            <div class="vehicle-card">
+                <h3>RUber Cargo <span class="driver-tag">Either</span></h3>
+                <p><strong>Electric Cargo Bike</strong></p>
+                <ul class="specs">
+                    <li>You sit in the front wooden bin like loose mulch</li>
+                    <li>Max speed: 20mph downhill with a tailwind</li>
+                    <li>Great for eco-conscious grocery store returns</li>
+                </ul>
+            </div>
+
+            <!-- Vehicle 4 -->
+            <div class="vehicle-card">
+                <h3>RUber Pure <span class="driver-tag">Legs Only</span></h3>
+                <p><strong>High-End Acoustic & e-Bikes</strong></p>
+                <ul class="specs">
+                    <li>Carbon fiber frames lighter than your dignity</li>
+                    <li>You will be handed a spare e-bike and told to keep up</li>
+                    <li>Aggressive Lycra-based dress code strictly enforced</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Calculator Section -->
+        <h2>Dynamic Surge Pricing Matrix</h2>
+        <div class="calc-box">
+            <div class="form-group">
+                <label for="vehicle-select">Select Your Chariot:</label>
+                <select id="vehicle-select">
+                    <option value="tesla">RUber Quiet (Tesla)</option>
+                    <option value="harley">RUber Loud (Harley Davidson)</option>
+                    <option value="cargo">RUber Cargo (Electric Bin)</option>
+                    <option value="bike">RUber Pure (High-End Pedal Power)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="distance-input">Estimated Distance (in block-radius fractions):</label>
+                <input type="number" id="distance-input" min="1" value="3" placeholder="How many blocks away?">
+            </div>
+
+            <button onclick="calculateFare()">Generate Algorithmic Estimate</button>
+
+            <div id="fare-result">
+                <strong style="color: #fff;">Estimated Fare:</strong> <span id="fare-output"></span>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <h2>Verified Customer Critiques</h2>
+        <p>We abandoned the traditional 5-star metric for a superior **Base-16 Hexadecimal Evaluation Scale (1 to F)**. F is perfection; 1 is a walk of shame.</p>
+
+        <div class="reviews-container">
+            <!-- Review 1 -->
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="reviewer-name">Karen S.</span>
+                    <span class="hex-rating">Rating: F / F</span>
+                </div>
+                <p class="review-text">"Doyle arrived in the Tesla. He didn't speak to me once, but he did play a flawless 45-minute playlist of ambient synthesizer music. The interior smelled faintly of high-end chain lubricant. Absolute perfection."</p>
+            </div>
+
+            <!-- Review 2 -->
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="reviewer-name">Chad McBike</span>
+                    <span class="hex-rating">Rating: B / F</span>
+                </div>
+                <p class="review-text">"Ordered the acoustic bike tier. Hans showed up on a carbon fiber frame that costs more than my entire apartment. He made me climb a 12% grade hill while lecturing me on optimal cadence. I vomited, but my cardio has never been better."</p>
+            </div>
+
+            <!-- Review 3 -->
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="reviewer-name">Gavin from Nextdoor</span>
+                    <span class="hex-rating">Rating: 4 / F</span>
+                </div>
+                <p class="review-text">"I booked the Cargo Bike to haul 80 pounds of topsoil. They threw me in the front crate *with* the topsoil. Doyle took the corners way too fast and I lost a shoe. Deducting points because they wouldn't take my coupon."</p>
+            </div>
+
+            <!-- Review 4 -->
+            <div class="review-card">
+                <div class="review-header">
+                    <span class="reviewer-name">Mildred H.</span>
+                    <span class="hex-rating">Rating: A / F</span>
+                </div>
+                <p class="review-text">"The Harley Davidson ride was terrifying. Hans didn't warn me about the exhaust pipe heat and it melted a corner of my Sunday dress. However, we did a wheelie past my ex-husband's house, so 10 out of 16 stars."</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 RUber Global Enterprises LLC. A subsidiary of Ravnaas Backyard Holdings.</p>
+        <p>Disclaimer: Not a real taxi service. Tips can be paid in artisanal coffee beans, craft beer, or high-pressure bike pumps.</p>
+    </footer>
+
+    <script>
+        function calculateFare() {
+            const vehicle = document.getElementById('vehicle-select').value;
+            const distance = parseFloat(document.getElementById('distance-input').value) || 0;
+            let outputText = "";
+
+            if (distance <= 0) {
+                outputText = "Please enter a distance greater than zero. Even Doyle won't start the Tesla for zero feet.";
+                document.getElementById('fare-output').innerText = outputText;
+                document.getElementById('fare-result').style.display = 'block';
+                return;
+            }
+
+            switch(vehicle) {
+                case 'tesla':
+                    const juiceCost = (distance * 0.45).toFixed(2);
+                    outputText = `$${juiceCost} + 1x Compliment on the clean touchscreen interface.`;
+                    break;
+                case 'harley':
+                    outputText = `3 Gallons of Premium Unleaded and an apology letter to the local neighborhood association.`;
+                    break;
+                case 'cargo':
+                    outputText = `A pint of local IPA and a promise that you won't sue if the wooden crate breaks over a speed bump.`;
+                    break;
+                case 'bike':
+                    const carbs = distance * 25;
+                    outputText = `${carbs}g of high-fructose energy gel packets and a vow of silence regarding how slow you rode.`;
+                    break;
+            }
+
+            document.getElementById('fare-output').innerText = outputText;
+            document.getElementById('fare-result').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
