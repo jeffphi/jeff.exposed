@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/assets/Profile-J.jpg" />
+    <title>White Noise Machine</title>
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #000;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        cursor: default;
+      }
+
+      #stage {
+        position: fixed;
+        inset: 0;
+        background: #000;
+      }
+
+      .clip {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: center center;
+        will-change: transform, opacity;
+        pointer-events: none;
+        mix-blend-mode: screen;
+        filter: saturate(0.7) contrast(1.15);
+      }
+
+      #begin {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #222;
+        font-family: Georgia, serif;
+        font-size: 14px;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        user-select: none;
+        cursor: pointer;
+        transition: opacity 2s ease;
+      }
+      #begin.gone {
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+<body>
+
+<div id="stage"></div>
+<div id="begin">begin</div>
+
+<script>
+/*
+ * WHITE NOISE MACHINE
+ *
+ * Drop video clips (mp4/webm) into ./white-noise-machine/clips/ and list
+ * them below. If the list is empty or nothing loads, the piece falls back
+ * to synthetic television static so the motion/audio design still runs.
+ */
+const VIDEO_SOURCES = [
+  // "white-noise-machine/clips/clip-01.mp4",
+  // "white-noise-machine/clips/clip-02.mp4",
+];
+
+// ---- Tuning ----------------------------------------------------------
+const Z_FAR = 9;              // where clips are born (deep in the screen)
+const Z_NEAR = 0.16;          // where clips die (past you, filling the screen)
+const FOCAL = 1.0;            // perspective strength
+const BASE_SPEED = 0.055;     // z units per second at the start
+const PEAK_SPEED = 0.14;      // z units per second at full chaos
+const RAMP_SECONDS = 150;     // time from first clip to full chaos
+const START_MAX_CLIPS = 3;
+const PEAK_MAX_CLIPS = 9;
+const START_SPAWN_GAP = 5;    // average seconds between spawns at the start
+const PEAK_SPAWN_GAP = 1.4;   // average seconds between spawns at full chaos
+const SPAWN_JITTER = 0.8;     // 0 = metronomic spawns, 1 = wildly irregular
+const CLIP_BASE_WIDTH = 260;  // px footprint at scale 1 (z == FOCAL)
+const EBB_PERIOD = 55;        // after peak, chaos breathes on this cycle (s)
+const EBB_DEPTH = 0.35;       // how much the breathing pulls back (0..1)
+
+const stage = document.getElementById("stage");
+const beginEl = document.getElementById("begin");
+
+let audioCtx = null;
+let masterGain = null;
+let running = false;
+let startTime = 0;
+let simTime = 0; // seconds of piece-time elapsed (respects ?timescale=)
+let lastFrame = 0;
+let lastSpawn = -Infinity;
+let spawnGapMult = 1; // re-rolled after every spawn to randomize the interval
+let clips = [];
+let usableSources = [];
+
+// ---- Intensity curve: 0 at start -> 1 at peak, then a slow breathe ----
+function intensity(now) {
+  const t = (now - startTime) / 1000;
+  const ramp = Math.min(1, t / RAMP_SECONDS);
+  if (ramp < 1) return ramp * ramp; // ease in
+  const breathe = 0.5 + 0.5 * Math.sin((t - RAMP_SECONDS) * 2 * Math.PI / EBB_PERIOD);
+  return 1 - EBB_DEPTH * (1 - breathe);
+}
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+// ---- Clip lifecycle ---------------------------------------------------
+function spawnClip(now) {
+  const el = usableSources.length > 0
+    ? makeVideoClip()
+    : makeStaticClip();
+  if (!el) return;
+
+  const clip = {
+    el: el.node,
+    audio: el.audio,       // {setVolume(v), stop()} or null
+    isVideo: el.isVideo,
+    // world position: tight cone around center so clips converge on the
+    // viewer and end up filling the screen instead of sliding past it
+    wx: (Math.random() * 2 - 1) * 0.18,
+    wy: (Math.random() * 2 - 1) * 0.12,
+    z: Z_FAR * (0.85 + Math.random() * 0.3),
+    bornZ: 0, // set below
+    speedJitter: 0.8 + Math.random() * 0.5,
+    aspect: el.aspect || (16 / 9),
+    dead: false,
+  };
+  clip.bornZ = clip.z;
+  el.node.classList.add("clip");
+  stage.appendChild(el.node);
+  clips.push(clip);
+  lastSpawn = now;
+}
+
+function makeVideoClip() {
+  const src = usableSources[Math.floor(Math.random() * usableSources.length)];
+  const v = document.createElement("video");
+  v.src = src;
+  v.muted = false;
+  v.volume = 0;
+  v.playsInline = true;
+  v.loop = true;
+  v.width = CLIP_BASE_WIDTH;
+  v.addEventListener("loadedmetadata", () => {
+    if (v.duration > 4) {
+      v.currentTime = Math.random() * (v.duration - 3);
+    }
+  }, { once: true });
+  v.play().catch(() => {});
+  return {
+    node: v,
+    isVideo: true,
+    aspect: 16 / 9,
+    audio: {
+      setVolume(vol) { v.volume = Math.max(0, Math.min(1, vol)); },
+      stop() { v.pause(); v.removeAttribute("src"); v.load(); },
+    },
+  };
+}
+
+// ---- Fallback: synthetic TV static with murmuring noise audio ---------
+function makeStaticClip() {
+  const c = document.createElement("canvas");
+  c.width = 160;
+  c.height = 90;
+  c.style.width = CLIP_BASE_WIDTH + "px";
+  c.style.height = (CLIP_BASE_WIDTH * 9 / 16) + "px";
+  const ctx = c.getContext("2d");
+  const img = ctx.createImageData(c.width, c.height);
+  let raf;
+  function drawNoise() {
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const n = Math.random() * 255;
+      d[i] = d[i + 1] = d[i + 2] = n;
+      d[i + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+    raf = requestAnimationFrame(drawNoise);
+  }
+  drawNoise();
+
+  let audio = null;
+  if (audioCtx) {
+    const len = audioCtx.sampleRate * 2;
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buf;
+    noise.loop = true;
+    // band-pass into the speech range so overlaps read as crowd murmur
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 300 + Math.random() * 1200;
+    bp.Q.value = 1.5;
+    // slow amplitude wobble, vaguely cadenced like talk
+    const lfo = audioCtx.createOscillator();
+    lfo.frequency.value = 2 + Math.random() * 4;
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 0.4;
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0;
+    lfo.connect(lfoGain);
+    lfoGain.connect(gain.gain);
+    noise.connect(bp);
+    bp.connect(gain);
+    gain.connect(masterGain);
+    noise.start();
+    lfo.start();
+    audio = {
+      setVolume(v) { gain.gain.setTargetAtTime(v * 0.5, audioCtx.currentTime, 0.05); },
+      stop() {
+        try { noise.stop(); lfo.stop(); } catch (e) {}
+        gain.disconnect();
+      },
+    };
+  }
+
+  return {
+    node: c,
+    isVideo: false,
+    aspect: 16 / 9,
+    audio,
+    _cleanup: () => cancelAnimationFrame(raf),
+  };
+}
+
+function killClip(clip) {
+  clip.dead = true;
+  if (clip.audio) clip.audio.stop();
+  clip.el.remove();
+}
+
+// ---- Per-frame update -------------------------------------------------
+function frame(rafNow) {
+  if (!running) return;
+  const dt = Math.min(0.1, (rafNow - lastFrame) / 1000) * TIMESCALE;
+  lastFrame = rafNow;
+  simTime += dt;
+  const now = startTime + simTime * 1000;
+  const k = intensity(now);
+
+  // spawn
+  const gap = lerp(START_SPAWN_GAP, PEAK_SPAWN_GAP, k) * spawnGapMult;
+  const maxClips = Math.round(lerp(START_MAX_CLIPS, PEAK_MAX_CLIPS, k));
+  if (clips.length < maxClips && (now - lastSpawn) / 1000 > gap) {
+    spawnClip(now);
+    spawnGapMult = 1 + SPAWN_JITTER * (Math.random() * 2 - 1);
+  }
+
+  const cw = window.innerWidth;
+  const ch = window.innerHeight;
+  const speed = lerp(BASE_SPEED, PEAK_SPEED, k);
+
+  for (const clip of clips) {
+    clip.z -= speed * clip.speedJitter * dt * 60 / 10;
+    if (clip.z <= Z_NEAR) {
+      killClip(clip);
+      continue;
+    }
+
+    const scale = FOCAL / clip.z;
+    const x = cw / 2 + clip.wx * scale * cw * 0.5;
+    const y = ch / 2 + clip.wy * scale * ch * 0.5;
+
+    // life goes 0 (born, far) -> 1 (dying, near)
+    const life = Math.max(0, 1 - (clip.z - Z_NEAR) / (clip.bornZ - Z_NEAR));
+    // fade in over the first stretch, then grow *more* transparent as it
+    // closes in — ghosts passing through you, gone entirely at arrival
+    const fadeIn = Math.min(1, life / 0.18);
+    const closeness = Math.max(0, (life - 0.45) / 0.55);
+    const ghost = 1 - closeness * closeness;
+    const opacity = fadeIn * ghost;
+
+    // voices swell with proximity, then wash out right at the end
+    const vol = fadeIn * (0.15 + 0.85 * life) * (life > 0.9 ? (1 - life) / 0.1 : 1);
+    if (clip.audio) clip.audio.setVolume(vol * 0.7);
+
+    const w = CLIP_BASE_WIDTH * scale;
+    clip.el.style.transform =
+      `translate(${x - w / 2}px, ${y - (w / clip.aspect) / 2}px) scale(${scale})`;
+    clip.el.style.transformOrigin = "top left";
+    clip.el.style.opacity = opacity.toFixed(3);
+  }
+  clips = clips.filter(c => !c.dead);
+
+  if (debugEl) {
+    debugEl.textContent =
+      `t=${((now - startTime) / 1000).toFixed(1)}s x${TIMESCALE} k=${k.toFixed(2)} ` +
+      `clips=${clips.length} z=[${clips.map(c => c.z.toFixed(2)).join(", ")}]`;
+  }
+
+  requestAnimationFrame(frame);
+}
+
+// ---- Source probing: keep only clips that actually load ---------------
+function probeSources() {
+  return Promise.all(VIDEO_SOURCES.map(src => new Promise(resolve => {
+    const v = document.createElement("video");
+    v.preload = "metadata";
+    v.src = src;
+    v.addEventListener("loadedmetadata", () => resolve(src), { once: true });
+    v.addEventListener("error", () => resolve(null), { once: true });
+    setTimeout(() => resolve(null), 8000);
+  }))).then(results => results.filter(Boolean));
+}
+
+// ---- Kickoff (audio needs a user gesture) ------------------------------
+async function start() {
+  if (running) return;
+  beginEl.classList.add("gone");
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.8;
+    masterGain.connect(audioCtx.destination);
+  } catch (e) { audioCtx = null; }
+  usableSources = await probeSources();
+  running = true;
+  startTime = performance.now();
+  simTime = SKIP;
+  lastFrame = startTime;
+  requestAnimationFrame(frame);
+}
+
+beginEl.addEventListener("click", start);
+// ?auto skips the begin gate (debugging; audio may stay suspended)
+const params = new URLSearchParams(location.search);
+// ?timescale=5 previews the pacing 5x faster than real time
+const TIMESCALE = parseFloat(params.get("timescale")) || 1;
+// ?skip=150 starts the piece 150s in (e.g. straight into the chaos)
+const SKIP = parseFloat(params.get("skip")) || 0;
+let debugEl = null;
+if (params.has("debug")) {
+  debugEl = document.createElement("div");
+  debugEl.style.cssText =
+    "position:fixed;bottom:8px;left:8px;color:#0f0;font:12px monospace;z-index:9";
+  document.body.appendChild(debugEl);
+}
+if (params.has("auto")) start();
+</script>
+
+</body>
+</html>

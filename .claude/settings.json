@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/<script>/{f=1;next}/<\\\\/script>/{f=0}f' white-noise-machine.html)",
+      "Bash(node --check /private/tmp/claude-501/-Users-jeff-projects-jeff-exposed/bf15c962-10ab-4071-b940-40368bc21a38/scratchpad/wnm.js)",
+      "Bash(node -e \"require\\('playwright'\\); console.log\\('playwright ok'\\)\")",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(ls /Applications/ | grep -i chrome; which chromedriver 2>/dev/null; echo ---)",
+      "Read(//Applications/**)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --window-size=1280,800 --virtual-time-budget=45000 --screenshot=/private/tmp/claude-501/-Users-jeff-projects-jeff-exposed/bf15c962-10ab-4071-b940-40368bc21a38/scratchpad/wnm-45s.png file:///Users/jeff/projects/jeff.exposed/white-noise-machine.html?auto)",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --window-size=1280,800 --virtual-time-budget=185000 --screenshot=/private/tmp/claude-501/-Users-jeff-projects-jeff-exposed/bf15c962-10ab-4071-b940-40368bc21a38/scratchpad/wnm-185s.png file:///Users/jeff/projects/jeff.exposed/white-noise-machine.html?auto)",
+      "Bash(\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\" --headless --disable-gpu --window-size=1280,800 --virtual-time-budget=60000 --dump-dom \"file:///Users/jeff/projects/jeff.exposed/white-noise-machine.html?auto&debug\")",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --window-size=1280,800 --timeout=10000 --screenshot=/private/tmp/claude-501/-Users-jeff-projects-jeff-exposed/bf15c962-10ab-4071-b940-40368bc21a38/scratchpad/wnm-peak.png 'file:///Users/jeff/projects/jeff.exposed/white-noise-machine.html?auto&debug&timescale=20')",
+      "Bash('/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --headless --disable-gpu --window-size=1280,800 --timeout=12000 --screenshot=/private/tmp/claude-501/-Users-jeff-projects-jeff-exposed/bf15c962-10ab-4071-b940-40368bc21a38/scratchpad/wnm-peak2.png 'file:///Users/jeff/projects/jeff.exposed/white-noise-machine.html?auto&debug&timescale=20')"
+    ]
+  }
+}

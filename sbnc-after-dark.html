@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SB Newcomers: After Dark — Connect. Belong. Experiment.</title>
+    <style>
+        :root {
+            --ocean: #1b6a8f;
+            --ocean-deep: #114b66;
+            --sunset: #e8734a;
+            --sand: #faf5ec;
+            --card: #ffffff;
+            --ink: #2d3436;
+            --muted: #6b7a83;
+            --wine: #8e3b5c;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: Georgia, "Times New Roman", serif;
+            background-color: var(--sand);
+            color: var(--ink);
+            margin: 0;
+            padding: 0;
+            line-height: 1.65;
+        }
+
+        .sans {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(160deg, var(--ocean-deep) 0%, var(--ocean) 55%, #2b8bb5 100%);
+            color: #ffffff;
+            text-align: center;
+            padding: 4rem 2rem 3.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 42px;
+            background: radial-gradient(circle at 50% 130%, transparent 0, transparent 60%, var(--sand) 61%);
+            background-size: 90px 60px;
+            background-repeat: repeat-x;
+        }
+
+        .est-badge {
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.55);
+            border-radius: 999px;
+            padding: 0.3rem 1.1rem;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        header h1 {
+            font-size: 3.2rem;
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        header h1 em {
+            color: #ffd9a8;
+            font-style: italic;
+        }
+
+        .tagline {
+            font-size: 1.35rem;
+            font-style: italic;
+            color: #d8ecf5;
+            margin: 1rem auto 0;
+            max-width: 640px;
+        }
+
+        .subtagline {
+            font-size: 1rem;
+            color: #a9cfe0;
+            max-width: 620px;
+            margin: 1rem auto 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        main {
+            max-width: 1020px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h2 {
+            font-size: 2.1rem;
+            font-weight: 400;
+            color: var(--ocean-deep);
+            margin-top: 3.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        h2 + .section-note {
+            color: var(--muted);
+            margin-top: 0;
+            font-style: italic;
+        }
+
+        .rule {
+            width: 64px;
+            height: 3px;
+            background: var(--sunset);
+            border: none;
+            margin: 0.8rem 0 1.5rem;
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: -1.2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat {
+            background: var(--card);
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(17, 75, 102, 0.12);
+            padding: 1.2rem 1rem;
+            text-align: center;
+        }
+
+        .stat .num {
+            font-size: 2rem;
+            color: var(--sunset);
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat .label {
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* Committee grid */
+        .committee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .committee-card {
+            background: var(--card);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(17, 75, 102, 0.08);
+            border-top: 4px solid var(--ocean);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .committee-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 22px rgba(17, 75, 102, 0.16);
+        }
+
+        .committee-card.spicy { border-top-color: var(--wine); }
+
+        .committee-card h3 {
+            margin: 0 0 0.2rem;
+            font-size: 1.25rem;
+            color: var(--ocean-deep);
+        }
+
+        .committee-card .emoji {
+            font-size: 1.6rem;
+            display: block;
+            margin-bottom: 0.4rem;
+        }
+
+        .chair {
+            font-size: 0.78rem;
+            color: var(--wine);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin-bottom: 0.7rem;
+        }
+
+        .committee-card p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #4a5a63;
+        }
+
+        /* Events */
+        .event-list {
+            margin-top: 1.5rem;
+        }
+
+        .event-row {
+            display: flex;
+            gap: 1.3rem;
+            background: var(--card);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(17, 75, 102, 0.08);
+            align-items: flex-start;
+        }
+
+        .event-date {
+            min-width: 68px;
+            text-align: center;
+            background: var(--sand);
+            border-radius: 8px;
+            padding: 0.5rem 0.4rem;
+            border: 1px solid #e8ddc9;
+        }
+
+        .event-date .month {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--sunset);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-weight: bold;
+        }
+
+        .event-date .day {
+            display: block;
+            font-size: 1.6rem;
+            color: var(--ocean-deep);
+            font-weight: bold;
+            line-height: 1.2;
+        }
+
+        .event-body h3 {
+            margin: 0 0 0.25rem;
+            font-size: 1.15rem;
+            color: var(--ocean-deep);
+        }
+
+        .event-body p {
+            margin: 0;
+            font-size: 0.93rem;
+            color: #4a5a63;
+        }
+
+        .event-meta {
+            font-size: 0.78rem;
+            color: var(--muted);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin-top: 0.45rem !important;
+        }
+
+        .waitlist {
+            display: inline-block;
+            background: var(--wine);
+            color: #fff;
+            font-size: 0.68rem;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+
+        /* Matcher quiz */
+        .matcher-box {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 18px rgba(17, 75, 102, 0.1);
+            margin-top: 1.5rem;
+        }
+
+        .form-group { margin-bottom: 1.4rem; }
+
+        label {
+            display: block;
+            margin-bottom: 0.45rem;
+            font-weight: bold;
+            color: var(--ocean-deep);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 0.95rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--sand);
+            border: 1px solid #d8cdb6;
+            border-radius: 6px;
+            color: var(--ink);
+            font-size: 1rem;
+            font-family: Georgia, serif;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--ocean);
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--sunset);
+            color: #fff;
+            border: none;
+            padding: 1rem;
+            font-size: 1.05rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        button:hover { background-color: #d15f38; }
+
+        #match-result {
+            margin-top: 1.5rem;
+            padding: 1.2rem 1.4rem;
+            background: rgba(232, 115, 74, 0.08);
+            border-left: 4px solid var(--sunset);
+            border-radius: 0 8px 8px 0;
+            display: none;
+        }
+
+        #match-result strong { color: var(--ocean-deep); }
+
+        /* Testimonials */
+        .testimonial {
+            background: var(--card);
+            border-left: 4px solid var(--wine);
+            border-radius: 0 10px 10px 0;
+            padding: 1.4rem 1.6rem;
+            margin-bottom: 1.3rem;
+            box-shadow: 0 2px 10px rgba(17, 75, 102, 0.07);
+        }
+
+        .testimonial .quote {
+            font-style: italic;
+            color: #45555e;
+            margin: 0 0 0.7rem;
+        }
+
+        .testimonial .who {
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .testimonial .who strong { color: var(--ocean-deep); }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--muted);
+            font-size: 0.85rem;
+            border-top: 1px solid #e3d9c4;
+            margin-top: 4rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        footer p { margin: 0.4rem 0; }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 2.2rem; }
+            .event-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="est-badge">Est. 1956 &middot; Rebranded Last Tuesday</div>
+        <h1>Santa Barbara Newcomers <em>After Dark</em></h1>
+        <p class="tagline">Connect. Belong. Experiment.</p>
+        <p class="subtagline">Moving to Santa Barbara is exciting — but finding your people takes time. Finding your <em>very open-minded</em> people takes about one hot tub invitation.</p>
+    </header>
+
+    <main>
+
+        <div class="stats-bar">
+            <div class="stat"><span class="num">37</span><span class="label">Committees (and climbing)</span></div>
+            <div class="stat"><span class="num">700+</span><span class="label">Members, most of them flexible</span></div>
+            <div class="stat"><span class="num">50+</span><span class="label">Events per month, 12 on the record</span></div>
+            <div class="stat"><span class="num">0</span><span class="label">Questions asked at check-in</span></div>
+        </div>
+
+        <h2>Our Committees</h2>
+        <p class="section-note">The daytime club has Hiking, Wine, and Dining Out. So do we. Ours just keep going after the official minutes stop.</p>
+        <hr class="rule">
+
+        <div class="committee-grid">
+
+            <div class="committee-card spicy">
+                <span class="emoji">💆</span>
+                <h3>Sensual Massage Circle</h3>
+                <div class="chair">Chair: Diane &middot; Vice Chair: Also Diane</div>
+                <p>Third Thursdays. Bring a towel, a signed waiver, and realistic expectations about Gary's grip strength. Essential oils provided; boundaries respected; eye contact optional but encouraged.</p>
+            </div>
+
+            <div class="committee-card spicy">
+                <span class="emoji">🔑</span>
+                <h3>The Swinging Society</h3>
+                <div class="chair">Chair: Rotates. Obviously.</div>
+                <p>Officially a big band dance appreciation group. Unofficially, the bowl by the door at Ted &amp; Marlene's is not for car keys you plan to leave with. Newcomers matched with an experienced mentor couple.</p>
+            </div>
+
+            <div class="committee-card spicy">
+                <span class="emoji">🍄</span>
+                <h3>Recreational Botany Club</h3>
+                <div class="chair">Chair: "Ask for Mushroom Steve"</div>
+                <p>Monthly foraging walks in the foothills where we identify local flora, and then some of us become one with it. Dosage guidance available from Steve, a retired pharmacist who has "seen the fabric of it all."</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🥾</span>
+                <h3>Trails &amp; Tabs</h3>
+                <div class="chair">Chair: Barefoot Craig</div>
+                <p>Our microdosing hiking committee. Inspiration Point has never been this inspirational. Moderate 4-mile loop, immoderate appreciation of lichen. Someone sober holds the car keys and the group chat.</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🍷</span>
+                <h3>Wine (Feral Division)</h3>
+                <div class="chair">Chair: Vacant since the Solvang Incident</div>
+                <p>The regular Wine Committee swirls and spits. We swirl and commit. Funk Zone tastings that begin with tasting notes and end with someone's sarong in a fountain. Uber budget line item approved 37–0.</p>
+            </div>
+
+            <div class="committee-card spicy">
+                <span class="emoji">🛁</span>
+                <h3>Hot Tub Diplomacy</h3>
+                <div class="chair">Chair: Whoever owns the tub</div>
+                <p>Where the club's real decisions get made. Swimsuits mandatory until 9 PM, at which point the committee enters executive session. Chlorine levels professionally maintained. Trust levels: your problem.</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🌊</span>
+                <h3>Butterfly Beach Moonlight Swim</h3>
+                <div class="chair">Chair: Prefers anonymity, wears a robe</div>
+                <p>Full-moon dips off Butterfly Beach. The dress code is described in the bylaws as "traditional." Towel valet provided by the Hospitality Committee, who have seen things and signed NDAs.</p>
+            </div>
+
+            <div class="committee-card spicy">
+                <span class="emoji">🎨</span>
+                <h3>Figure Drawing (Members Model)</h3>
+                <div class="chair">Chair: Lorraine, unbothered</div>
+                <p>Why hire a model when Richard from the Cycling Committee has been dying to volunteer since 2023? Charcoal provided. Flattering angles are the artist's responsibility, not the club's.</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🃏</span>
+                <h3>Bridge, But With Stakes</h3>
+                <div class="chair">Chair: "The Commissioner"</div>
+                <p>Grandma's card game, cartel accounting. Buy-ins start at $20 and end at "my timeshare in Cabo." A gentleman named Whit runs the book. We do not ask Whit questions.</p>
+            </div>
+
+            <div class="committee-card spicy">
+                <span class="emoji">📚</span>
+                <h3>Tantric Book Club</h3>
+                <div class="chair">Chair: Susan &amp; Susan's husband, technically</div>
+                <p>We read one book a quarter and practice active listening, sustained eye contact, and breathwork. The book is largely a formality. February's selection has been "in progress" for three years.</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🧊</span>
+                <h3>Cold Plunge &amp; Confessions</h3>
+                <div class="chair">Chair: Deb, who feels nothing anymore</div>
+                <p>Sunrise plunges at Leadbetter followed by a sharing circle where the cold does the emotional excavation for you. What's said in the 54-degree water stays in the 54-degree water.</p>
+            </div>
+
+            <div class="committee-card spicy">
+                <span class="emoji">🍲</span>
+                <h3>Polyamory Potluck</h3>
+                <div class="chair">Chairs: It's complicated</div>
+                <p>Everyone brings a dish and a calendar. The sign-up sheet is color-coded and laminated because we learned the hard way. Casserole disputes mediated by the Ethics Subcommittee (also complicated).</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🍪</span>
+                <h3>Edibles &amp; Appetizers Pairing</h3>
+                <div class="chair">Chair: Chef Marguerite (2.5mg)</div>
+                <p>Elevated small bites paired with, well, elevation. Everything is labeled, dosed, and beautiful. The 7 PM seating is mellow. Do not sign up for the 5 PM seating thinking you'll drive home at 8.</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🪓</span>
+                <h3>Axe Throwing After Wine Tasting</h3>
+                <div class="chair">Chair: Our insurance adjuster, reluctantly</div>
+                <p>Exactly what it sounds like, in exactly that order. The single most popular committee three years running. Zero injuries to date, which our chair describes as "statistically enraging."</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🎤</span>
+                <h3>Karaoke Until Someone Cries</h3>
+                <div class="chair">Chair: Bill, who starts it</div>
+                <p>Starts as fun group karaoke, ends when Bill does "Wichita Lineman" and we all think about our first marriages. Kleenex budget is the second-largest line item after the wine budget.</p>
+            </div>
+
+            <div class="committee-card">
+                <span class="emoji">🏓</span>
+                <h3>Pickleball: No-Apology Division</h3>
+                <div class="chair">Chair: Sandra "The Kitchen" Delgado</div>
+                <p>For members asked to leave the regular pickleball group over "tone." We body-bag at the net and we do not say sorry. Winner of the annual grudge match against the daytime club, 4 years running.</p>
+            </div>
+
+        </div>
+
+        <h2>Upcoming Events</h2>
+        <p class="section-note">All events are member-only, clothing-policy-varies, and absolutely not mentioned in the newsletter.</p>
+        <hr class="rule">
+
+        <div class="event-list">
+
+            <div class="event-row">
+                <div class="event-date"><span class="month">Jul</span><span class="day">11</span></div>
+                <div class="event-body">
+                    <h3>Full Moon Swim &amp; "Traditional" Dress Code Social <span class="waitlist">Waitlist</span></h3>
+                    <p>Butterfly Beach, 9:30 PM. Robes drop at 10. New members: the person collecting towels is a volunteer, not a valet, and his name is Herb.</p>
+                    <p class="event-meta">Hosted by Butterfly Beach Moonlight Swim &middot; BYO towel &middot; Herb is not tipped in cash</p>
+                </div>
+            </div>
+
+            <div class="event-row">
+                <div class="event-date"><span class="month">Jul</span><span class="day">18</span></div>
+                <div class="event-body">
+                    <h3>Foothills Forage &amp; Vibe Check</h3>
+                    <p>Rattlesnake Canyon trailhead, 8 AM sharp. Steve will identify what's safe. Craig will identify what's "an experience." Please eat a real breakfast first — we cannot stress this enough.</p>
+                    <p class="event-meta">Recreational Botany Club × Trails &amp; Tabs joint session &middot; Designated key-holder: Deb</p>
+                </div>
+            </div>
+
+            <div class="event-row">
+                <div class="event-date"><span class="month">Jul</span><span class="day">24</span></div>
+                <div class="event-body">
+                    <h3>Big Band Night at Ted &amp; Marlene's <span class="waitlist">Waitlist</span></h3>
+                    <p>Doors at 7. Dancing at 8. The bowl comes out "whenever the spirit moves us," per Marlene. Street parking only — you may not need your car until brunch anyway.</p>
+                    <p class="event-meta">The Swinging Society &middot; Couples &amp; adventurous singles &middot; Glenn Miller optional</p>
+                </div>
+            </div>
+
+            <div class="event-row">
+                <div class="event-date"><span class="month">Aug</span><span class="day">02</span></div>
+                <div class="event-body">
+                    <h3>Funk Zone Crawl → Axe Range (Annual)</h3>
+                    <p>Our flagship event. Four tastings, one axe range, one extremely tense insurance adjuster. Last year's champion, Lorraine, will defend her title and her claim that "the wine helps."</p>
+                    <p class="event-meta">Wine (Feral Division) × Axe Throwing &middot; Chartered trolley &middot; Waiver notarized on-site</p>
+                </div>
+            </div>
+
+            <div class="event-row">
+                <div class="event-date"><span class="month">Aug</span><span class="day">09</span></div>
+                <div class="event-body">
+                    <h3>New Member Orientation &amp; Hot Tub Executive Session</h3>
+                    <p>The first 45 minutes are a normal orientation with a slideshow. Then the slideshow ends, the lights dim, and Diane explains the color-coded wristband system. Stay for that part.</p>
+                    <p class="event-meta">Hot Tub Diplomacy &middot; Suits mandatory until 9 PM &middot; Wristbands non-transferable</p>
+                </div>
+            </div>
+
+        </div>
+
+        <h2>Find Your Committee</h2>
+        <p class="section-note">New in town? Answer two questions and our proprietary matching algorithm (Diane) will place you.</p>
+        <hr class="rule">
+
+        <div class="matcher-box">
+            <div class="form-group">
+                <label for="comfort-select">How adventurous are you feeling?</label>
+                <select id="comfort-select">
+                    <option value="mild">Mild — I recently moved from Ohio and I'm still adjusting</option>
+                    <option value="medium">Medium — I've been to a "party" party. Once. In the 90s.</option>
+                    <option value="spicy">Spicy — My therapist says I'm "seeking"</option>
+                    <option value="feral">Fully Feral — I was asked to leave the daytime club</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="vice-select">Preferred Friday night enhancement?</label>
+                <select id="vice-select">
+                    <option value="wine">A robust local red (or six)</option>
+                    <option value="botanical">Something botanical, wink</option>
+                    <option value="endorphins">Pure endorphins and cold seawater</option>
+                    <option value="humans">Other consenting adults</option>
+                </select>
+            </div>
+
+            <button onclick="matchCommittee()">Match Me With My People</button>
+
+            <div id="match-result">
+                <strong>Diane's Placement:</strong> <span id="match-output"></span>
+            </div>
+        </div>
+
+        <h2>What Our Members Say</h2>
+        <p class="section-note">Collected anonymously. De-anonymized immediately, because this town has one Trader Joe's and everyone was going to figure it out anyway.</p>
+        <hr class="rule">
+
+        <div class="testimonial">
+            <p class="quote">"I joined the regular Newcomers to make friends and joined After Dark to keep them. I came for the hiking. I stayed because of what Craig showed me at Inspiration Point. I mean the view. Mostly the view."</p>
+            <p class="who"><strong>Patricia W.</strong> &middot; Member since 2024 &middot; Trails &amp; Tabs, Cold Plunge &amp; Confessions</p>
+        </div>
+
+        <div class="testimonial">
+            <p class="quote">"My wife and I moved here from Sacramento and didn't know a soul. Six weeks later we hosted Big Band Night. I still can't find our fondue set, but honestly, we came out ahead."</p>
+            <p class="who"><strong>Ted (yes, that Ted)</strong> &middot; Member since 2023 &middot; The Swinging Society, Bridge But With Stakes</p>
+        </div>
+
+        <div class="testimonial">
+            <p class="quote">"As a retired HR director, I want to be clear that everything here is consensual, documented, and laminated. As a Tantric Book Club member, I want to be clear that I have not finished the book."</p>
+            <p class="who"><strong>Susan (the other one)</strong> &middot; Member since 2022 &middot; Tantric Book Club, Polyamory Potluck (Ethics Subcommittee)</p>
+        </div>
+
+        <div class="testimonial">
+            <p class="quote">"I modeled for Figure Drawing to confront my fears and I now hang in eleven Montecito guest bathrooms. Santa Barbara feels like home."</p>
+            <p class="who"><strong>Richard</strong> &middot; Member since 2023 &middot; Figure Drawing, Cycling (daytime club, they can't prove anything)</p>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Santa Barbara Newcomers: After Dark. Not affiliated with, endorsed by, or acknowledged in the presence of the actual Santa Barbara Newcomers Club.</p>
+        <p>Membership open to anyone who moved to Santa Barbara within the last 18 months, or who claims they did with sufficient confidence.</p>
+        <p>Disclaimer: This is satire. The real SB Newcomers Club is lovely, wholesome, and would like Herb to please return the towels.</p>
+    </footer>
+
+    <script>
+        function matchCommittee() {
+            const comfort = document.getElementById('comfort-select').value;
+            const vice = document.getElementById('vice-select').value;
+            let placement = "";
+
+            const matrix = {
+                mild: {
+                    wine: "Wine (Feral Division), 6 PM seating only, and Karaoke Until Someone Cries. You'll ease in. Bill needs a duet partner for 'Islands in the Stream' anyway.",
+                    botanical: "Edibles & Appetizers Pairing — the 7 PM seating, the 2.5mg tier, and a name tag that says ASK ME ABOUT OHIO. Chef Marguerite will take it from here.",
+                    endorphins: "Cold Plunge & Confessions. The water handles the small talk. Deb will hand you a thermos and a devastating personal insight by week three.",
+                    humans: "Polyamory Potluck as a 'dish-only observer.' You bring a casserole, you keep your calendar, and you leave whenever you like. Everyone starts somewhere."
+                },
+                medium: {
+                    wine: "The Funk Zone Crawl in August, then straight onto the Axe Throwing roster. In that order. The order is important and legally significant.",
+                    botanical: "Recreational Botany Club. Steve will start you on 'identification only' walks. Whether you graduate is between you, Steve, and the fabric of it all.",
+                    endorphins: "Butterfly Beach Moonlight Swim — but the 9:30 arrival, not the 10 PM arrival. You'll know when you're ready for the 10 PM arrival.",
+                    humans: "Sensual Massage Circle, receiving side only for the first quarter. Diane insists newcomers learn to accept care before they inflict Gary-level enthusiasm on others."
+                },
+                spicy: {
+                    wine: "Hot Tub Diplomacy. Bring a good Syrah and stay for executive session. You will leave with three new friends and a position on the Bylaws Committee you don't remember accepting.",
+                    botanical: "Trails & Tabs, full membership, Craig's cohort. Wear shoes anyway — Craig's 'barefoot grounding' journey is his own and need not be yours.",
+                    endorphins: "The full moon swim, 10 PM arrival, followed by Cold Plunge & Confessions at dawn. Back to back. You said you were seeking. Seek.",
+                    humans: "Tantric Book Club AND The Swinging Society. Yes, both Susans already know about you. News travels fast when everyone's this well-connected."
+                },
+                feral: {
+                    wine: "You're the new Wine (Feral Division) chair. The position has been vacant since Solvang and frankly you're the first applicant with the right energy. Condolences and congratulations.",
+                    botanical: "Steve has been waiting for you. Check your mailbox. There is no further information at this time.",
+                    endorphins: "Pickleball: No-Apology Division. Sandra watched the tape of why you left the daytime club and she says, quote, 'finally.'",
+                    humans: "Big Band Night at Ted & Marlene's, VIP bowl access, and a standing invitation to the Hot Tub executive session. Welcome home. Marlene will find you."
+                }
+            };
+
+            placement = matrix[comfort][vice];
+            document.getElementById('match-output').innerText = placement;
+            document.getElementById('match-result').style.display = 'block';
+            document.getElementById('match-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
