@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Visualizations</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #070303;
+            font-family: Verdana, sans-serif;
+        }
+
+        canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #caption {
+            position: fixed;
+            left: 16px;
+            top: 12px;
+            color: rgba(255, 255, 255, 0.28);
+            font-size: 13px;
+            letter-spacing: 0.04em;
+            pointer-events: none;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="stage"></canvas>
+    <div id="caption"></div>
+
+    <script>
+        // ---------------------------------------------------------------
+        // Tiny helpers: hashing, value noise, easing
+        // ---------------------------------------------------------------
+        const TAU = Math.PI * 2;
+
+        function hash(n) {
+            const s = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+            return s - Math.floor(s);
+        }
+
+        function hash2(x, y) {
+            const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
+            return s - Math.floor(s);
+        }
+
+        // smooth 1D value noise, 0..1
+        function noise1(x) {
+            const i = Math.floor(x), f = x - i;
+            const u = f * f * (3 - 2 * f);
+            return hash(i) * (1 - u) + hash(i + 1) * u;
+        }
+
+        // smooth 2D value noise, 0..1
+        function noise2(x, y) {
+            const ix = Math.floor(x), iy = Math.floor(y);
+            const fx = x - ix, fy = y - iy;
+            const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+            const a = hash2(ix, iy), b = hash2(ix + 1, iy);
+            const c = hash2(ix, iy + 1), d = hash2(ix + 1, iy + 1);
+            return (a * (1 - ux) + b * ux) * (1 - uy) + (c * (1 - ux) + d * ux) * uy;
+        }
+
+        function fbm2(x, y, octaves) {
+            let sum = 0, amp = 0.5, norm = 0;
+            for (let o = 0; o < octaves; o++) {
+                sum += amp * noise2(x, y);
+                norm += amp;
+                x *= 2.03; y *= 2.03; amp *= 0.5;
+            }
+            return sum / norm;
+        }
+
+        const easeOutCubic = p => 1 - Math.pow(1 - p, 3);
+        const rand = (a, b) => a + Math.random() * (b - a);
+
+        // ---------------------------------------------------------------
+        // Visualization #1: white blob with a green fractal corona
+        // ---------------------------------------------------------------
+        const Viz1 = (() => {
+            // Everything worth tweaking lives here.
+            const CONFIG = {
+                blobRadius: 0.228,       // fraction of min(width, height)
+                ribbonWidth: 0.10,       // corona thickness, fraction of blob radius
+                wander: 0.06,            // how far the pattern meanders around the rim (fraction of a full lap)
+                fractalIter: 90,         // iteration cap (more = deeper detail, slower)
+                colorBands: 0.14,        // how tightly the colour stripes pack
+                flow: 0.25,              // how fast colour stripes flow outward
+                textureFps: 12,          // how often the fractal is recomputed
+                textureScale: 1.5,       // max texture pixels per CSS pixel
+                sparkRate: 5,            // stray dot re-scatter, per second
+                sparkCount: 200,
+                driftSpeed: [0.01, 0.0225],    // fraction of min dimension per second (constant)
+                driftRamp: 0.8,                // seconds to ease up to that speed
+                driftDuration: [2.0, 4.5],     // seconds
+                restDuration: [1.5, 5.5],      // seconds between drifts
+                snapDuration: 0.12,            // seconds to snap back
+            };
+
+            // Slowly wandering harmonics keep the outline near-circular but never perfect.
+            const HARMONICS = [
+                { n: 2, amp: 0.035, speed: 0.23, phase: 0.4 },
+                { n: 3, amp: 0.030, speed: 0.31, phase: 2.1 },
+                { n: 4, amp: 0.020, speed: -0.40, phase: 4.0 },
+                { n: 5, amp: 0.015, speed: 0.55, phase: 1.3 },
+                { n: 7, amp: 0.008, speed: -0.70, phase: 5.2 },
+            ];
+
+            let w = 0, h = 0, dpr = 1, minDim = 0;
+
+            // low-res offscreen canvas for the muddy background
+            const bg = document.createElement('canvas');
+            let bgCtx, bgImage;
+
+            // film-grain tiles ("visual snow")
+            const grainTiles = [];
+            let grainPattern = [];
+
+            let sparks = [];
+            let sparkTick = -1;
+
+            // fractal texture: an offscreen canvas centred on the blob, plus a precomputed
+            // list of the pixels that could ever fall inside the corona band
+            const tex = document.createElement('canvas');
+            let texCtx, texImage, texScale = 1, texHalf = 0, texR = 0, lastTex = -1;
+            let bandIdx, bandR, bandTheta, bandCount = 0;
+            const OUT_BINS = 2048;
+            const outTable = new Float32Array(OUT_BINS + 1);
+            const paletteLUT = new Uint8Array(256 * 3);
+
+            // The corona follows the boundary of the Mandelbrot set's main cardioid,
+            // c(a) = e^(ia)/2 - e^(2ia)/4, which is fringed with bulbs of every size.
+            // Tables are indexed by arc length (perimeter = 4) so the band isn't stretched.
+            const CARD_TAB = 8192, CARD_LEN = 4;
+            const cardX = new Float32Array(CARD_TAB), cardY = new Float32Array(CARD_TAB);
+            const cardNX = new Float32Array(CARD_TAB), cardNY = new Float32Array(CARD_TAB);
+            for (let i = 0; i < CARD_TAB; i++) {
+                const sLen = (i / CARD_TAB) * CARD_LEN;
+                const a = 2 * Math.acos(Math.max(-1, Math.min(1, 1 - sLen / 2)));
+                cardX[i] = Math.cos(a) / 2 - Math.cos(2 * a) / 4;
+                cardY[i] = Math.sin(a) / 2 - Math.sin(2 * a) / 4;
+                // tangent = i/2 (e^ia - e^2ia); outward normal = tangent rotated -90deg
+                const tx = -(Math.sin(a) - Math.sin(2 * a)) / 2, ty = (Math.cos(a) - Math.cos(2 * a)) / 2;
+                const tl = Math.hypot(tx, ty) || 1;
+                cardNX[i] = ty / tl;
+                cardNY[i] = -tx / tl;
+            }
+
+            const drift = { state: 'rest', until: 1.2, t0: 0, last: 0, dur: 1, vx: 0, vy: 0, fx: 0, fy: 0, x: 0, y: 0 };
+
+            function setup(width, height, pixelRatio, ctx) {
+                w = width; h = height; dpr = pixelRatio; minDim = Math.min(w, h);
+
+                const bh = 72;
+                bg.height = bh;
+                bg.width = Math.max(2, Math.round(bh * w / h));
+                bgCtx = bg.getContext('2d');
+                bgImage = bgCtx.createImageData(bg.width, bg.height);
+
+                if (!grainTiles.length) {
+                    for (let k = 0; k < 4; k++) {
+                        const tile = document.createElement('canvas');
+                        tile.width = tile.height = 256;
+                        const tctx = tile.getContext('2d');
+                        const img = tctx.createImageData(256, 256);
+                        for (let i = 0; i < img.data.length; i += 4) {
+                            const v = Math.random() * 255;
+                            img.data[i] = v;
+                            img.data[i + 1] = v * 0.55;
+                            img.data[i + 2] = v * 0.45;
+                            img.data[i + 3] = 255;
+                        }
+                        tctx.putImageData(img, 0, 0);
+                        grainTiles.push(tile);
+                    }
+                }
+                grainPattern = grainTiles.map(t => ctx.createPattern(t, 'repeat'));
+
+                setupTexture();
+            }
+
+            function setupTexture() {
+                texScale = Math.min(dpr, CONFIG.textureScale);
+                texR = CONFIG.blobRadius * minDim * texScale;
+                texHalf = Math.ceil(texR * 1.25);
+                const S = texHalf * 2;
+                tex.width = tex.height = S;
+                texCtx = tex.getContext('2d');
+                texImage = texCtx.createImageData(S, S);
+
+                // pixels between 0.87R and 1.2R can be part of the band (the outline wobbles)
+                const lo = texR * 0.87, hi = texR * 1.2;
+                const inBand = (x, y) => {
+                    const r = Math.hypot(x - texHalf + 0.5, y - texHalf + 0.5);
+                    return r >= lo && r <= hi;
+                };
+                let n = 0;
+                for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) if (inBand(x, y)) n++;
+                bandCount = n;
+                bandIdx = new Int32Array(n);
+                bandR = new Float32Array(n);
+                bandTheta = new Float32Array(n);
+                let m = 0;
+                for (let y = 0; y < S; y++) {
+                    for (let x = 0; x < S; x++) {
+                        if (!inBand(x, y)) continue;
+                        const dx = x - texHalf + 0.5, dy = y - texHalf + 0.5;
+                        const r = Math.hypot(dx, dy);
+                        let th = Math.atan2(dy, dx);
+                        if (th < 0) th += TAU;
+                        bandIdx[m] = y * S + x;
+                        bandR[m] = r;
+                        bandTheta[m] = th / TAU * OUT_BINS;
+                        m++;
+                    }
+                }
+
+                // colour ramp: deep blue-teal -> teal -> emerald -> pale green, then a hard reset
+                const stops = [[0, 20, 52, 86], [0.3, 24, 108, 92], [0.7, 52, 170, 96], [1, 120, 210, 135]];
+                for (let i = 0; i < 256; i++) {
+                    const g = i / 255;
+                    let k = 0;
+                    while (k < stops.length - 2 && g > stops[k + 1][0]) k++;
+                    const a = stops[k], b = stops[k + 1];
+                    const f = (g - a[0]) / (b[0] - a[0]);
+                    for (let c = 0; c < 3; c++) paletteLUT[i * 3 + c] = a[c + 1] + (b[c + 1] - a[c + 1]) * f;
+                }
+                lastTex = -1;
+            }
+
+            // ---- outline -------------------------------------------------
+            function outline(theta, t, phaseShift) {
+                let r = 1 + 0.012 * Math.sin(t * 0.7);
+                for (const hm of HARMONICS) {
+                    r += hm.amp * Math.sin(hm.n * theta + hm.phase + t * hm.speed + phaseShift);
+                }
+                return r;
+            }
+
+            // ---- background ----------------------------------------------
+            function drawBackground(ctx, t) {
+                const d = bgImage.data, bw = bg.width, bh = bg.height;
+                const aspect = bw / bh;
+                for (let y = 0; y < bh; y++) {
+                    for (let x = 0; x < bw; x++) {
+                        const nx = (x / bw) * 2.4 * aspect + t * 0.020;
+                        const ny = (y / bh) * 2.4 - t * 0.014;
+                        const v = fbm2(nx, ny, 3);
+                        const v2 = v * v;
+                        const i = (y * bw + x) * 4;
+                        d[i] = 5 + v2 * 24;
+                        d[i + 1] = 2 + v2 * 8;
+                        d[i + 2] = 2 + v2 * 6;
+                        d[i + 3] = 255;
+                    }
+                }
+                bgCtx.putImageData(bgImage, 0, 0);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(bg, 0, 0, w, h);
+            }
+
+            function drawGrain(ctx, alpha) {
+                const k = Math.floor(Math.random() * grainPattern.length);
+                ctx.save();
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.translate(-Math.random() * 256, -Math.random() * 256);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = grainPattern[k];
+                ctx.fillRect(0, 0, w * dpr + 256, h * dpr + 256);
+                ctx.restore();
+            }
+
+            // ---- blob ----------------------------------------------------
+            function blobPath(ctx, cx, cy, R, scale, t, phaseShift) {
+                const steps = 120;
+                ctx.beginPath();
+                for (let i = 0; i <= steps; i++) {
+                    const th = (i / steps) * TAU;
+                    const r = R * scale * outline(th, t, phaseShift);
+                    const x = cx + Math.cos(th) * r, y = cy + Math.sin(th) * r;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+            }
+
+            function drawBlob(ctx, cx, cy, R, t) {
+                // faint reddish light bleeding into the surrounding dark
+                const glow = ctx.createRadialGradient(cx, cy, R * 0.6, cx, cy, R * 2.1);
+                glow.addColorStop(0, 'rgba(140, 50, 28, 0.20)');
+                glow.addColorStop(0.5, 'rgba(80, 26, 14, 0.07)');
+                glow.addColorStop(1, 'rgba(60, 20, 10, 0)');
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, w, h);
+
+                // soft, fuzzy body: many faint stacked outlines, so no visible banding
+                const layers = 56;
+                for (let i = 0; i < layers; i++) {
+                    const k = i / (layers - 1);
+                    const scale = 1.04 - k * 0.80;
+                    const r = 245 + 10 * k, g = 255, b = 243 + 12 * k;
+                    ctx.fillStyle = `rgba(${r | 0}, ${g}, ${b | 0}, 0.075)`;
+                    blobPath(ctx, cx, cy, R, scale, t, i * 0.09);
+                    ctx.fill();
+                }
+            }
+
+            // ---- corona --------------------------------------------------
+            // The corona is a real fractal. Each pixel of a thin band hugging the blob's edge
+            // is mapped onto a small ring in the Mandelbrot set's "seahorse valley", and
+            // coloured by its escape time. The ring's centre, size and rotation all drift,
+            // so the texture is always morphing. The band's outer edge follows the
+            // fractal's own contours, which gives it its frilly outline.
+            function updateTexture(t, R) {
+                for (let i = 0; i <= OUT_BINS; i++) outTable[i] = outline((i / OUT_BINS) * TAU, t, 0);
+
+                const S = texHalf * 2;
+                const data = texImage.data;
+                data.fill(0);
+
+                const bw = CONFIG.ribbonWidth;
+                const bwPx = bw * texR;
+                const maxIter = CONFIG.fractalIter;
+                const bands = CONFIG.colorBands;
+                const phase = t * CONFIG.flow;
+
+                // the band sits just outside the cardioid; isotropic scale:
+                // 2*pi*R pixels per CARD_LEN units, so the band is bw*CARD_LEN/(2*pi) units thick
+                const bandUnits = bw * CARD_LEN / TAU;
+                const d0 = -0.004;
+                // no steady spin: the pattern meanders a little each way at irregular speeds
+                const slide = CONFIG.wander * ((noise1(t * 0.07 + 3) - 0.5) * 2 + 0.4 * (noise1(t * 0.21 + 17) - 0.5) * 2);
+
+                for (let m = 0; m < bandCount; m++) {
+                    const tf = bandTheta[m];
+                    const bi = tf | 0, bf = tf - bi;
+                    const outl = outTable[bi] * (1 - bf) + outTable[bi + 1] * bf;
+                    const rho = (bandR[m] - texR * (outl - 0.005)) / bwPx;
+                    if (rho < 0 || rho > 1) continue;
+
+                    let u = tf / OUT_BINS + slide;
+                    u -= Math.floor(u);
+                    const k = (u * CARD_TAB) | 0;
+                    const d = d0 + rho * bandUnits;
+                    const cx = cardX[k] + cardNX[k] * d, cy = cardY[k] + cardNY[k] * d;
+
+                    let zx = 0, zy = 0, it = 0, m2 = 0;
+                    while (it < maxIter) {
+                        const nx = zx * zx - zy * zy + cx;
+                        zy = 2 * zx * zy + cy;
+                        zx = nx;
+                        m2 = zx * zx + zy * zy;
+                        if (m2 > 256) break;
+                        it++;
+                    }
+
+                    const o = bandIdx[m] * 4;
+                    let g, reach;
+                    const inSet = it >= maxIter;
+                    if (inSet) {
+                        g = 0;                  // inside the set: deep, dark green
+                        reach = 0.6;
+                    } else {
+                        const mu = it + 1 - Math.log(Math.log(m2) / Math.LN2) / Math.LN2;
+                        const v = mu * bands - phase;
+                        g = v - Math.floor(v);
+                        reach = 0.45 + 0.55 * g;    // bright stripes reach farther out
+                    }
+
+                    let a = rho < 0.12 ? rho / 0.12 : 1;              // melt into the blob
+                    const edge = (reach - rho) / 0.05;                // fractal-shaped outer edge
+                    a *= edge < 0 ? 0 : edge > 1 ? 1 : edge;
+                    if (a <= 0) continue;
+
+                    if (inSet) {
+                        data[o] = 8; data[o + 1] = 48; data[o + 2] = 40;
+                    } else {
+                        const li = ((g * 255) | 0) * 3;
+                        data[o] = paletteLUT[li];
+                        data[o + 1] = paletteLUT[li + 1];
+                        data[o + 2] = paletteLUT[li + 2];
+                    }
+                    data[o + 3] = a * 255;
+                }
+                texCtx.putImageData(texImage, 0, 0);
+            }
+
+            // outer edge of the corona at angle th, for placing the stray bits
+            const outerRadius = (th, R, t) => R * (outline(th, t, 0) + CONFIG.ribbonWidth);
+
+            function drawCorona(ctx, cx, cy, R, t) {
+                if (lastTex < 0 || t - lastTex >= 1 / CONFIG.textureFps) {
+                    lastTex = t;
+                    updateTexture(t, R);
+                }
+
+                ctx.save();
+
+                // faint teal haze just outside
+                ctx.beginPath();
+                for (let i = 0; i <= 240; i++) {
+                    const th = (i / 240) * TAU;
+                    const r = outerRadius(th, R, t) - R * 0.01;
+                    const x = cx + Math.cos(th) * r, y = cy + Math.sin(th) * r;
+                    if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+                }
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = 'rgba(20, 120, 100, 0.10)';
+                ctx.stroke();
+
+                // the fractal band
+                ctx.imageSmoothingEnabled = true;
+                const size = tex.width / texScale;
+                ctx.drawImage(tex, cx - size / 2, cy - size / 2, size, size);
+
+                // stray dots scattered around the rim
+                const tick = Math.floor(t * CONFIG.sparkRate);
+                if (tick !== sparkTick) {
+                    sparkTick = tick;
+                    sparks = [];
+                    for (let i = 0; i < CONFIG.sparkCount; i++) {
+                        sparks.push(Math.random() * TAU, Math.random() * Math.random() * 0.16 - 0.01, Math.random());
+                    }
+                }
+                ctx.fillStyle = 'rgba(90, 210, 120, 0.95)';
+                for (let i = 0; i < sparks.length; i += 3) {
+                    const th = sparks[i];
+                    const r = outerRadius(th, R, t) + sparks[i + 1] * R;
+                    const sz = sparks[i + 2] < 0.15 ? 2 : 1;
+                    ctx.fillRect(cx + Math.cos(th) * r, cy + Math.sin(th) * r, sz, sz);
+                }
+                ctx.restore();
+            }
+
+            // ---- drift ---------------------------------------------------
+            const smoothstep = p => p * p * (3 - 2 * p);
+
+            function updateDrift(t) {
+                const d = drift;
+                const dt = Math.min(0.1, t - d.last);
+                d.last = t;
+
+                if (d.state === 'rest' && t >= d.until) {
+                    const ang = rand(0, TAU);
+                    const speed = rand(...CONFIG.driftSpeed) * minDim;
+                    d.state = 'drift';
+                    d.t0 = t;
+                    d.dur = rand(...CONFIG.driftDuration);
+                    d.vx = Math.cos(ang) * speed;
+                    d.vy = Math.sin(ang) * speed;
+                }
+                if (d.state === 'drift') {
+                    // ease up to a cruising speed, then hold it constant
+                    const elapsed = t - d.t0;
+                    const ramp = smoothstep(Math.min(1, elapsed / CONFIG.driftRamp));
+                    d.x += d.vx * ramp * dt;
+                    d.y += d.vy * ramp * dt;
+                    if (elapsed >= d.dur) {
+                        d.state = 'snap';
+                        d.t0 = t;
+                        d.fx = d.x;
+                        d.fy = d.y;
+                    }
+                } else if (d.state === 'snap') {
+                    const p = Math.min(1, (t - d.t0) / CONFIG.snapDuration);
+                    const e = 1 - easeOutCubic(p);
+                    d.x = d.fx * e;
+                    d.y = d.fy * e;
+                    if (p >= 1) {
+                        d.state = 'rest';
+                        d.until = t + rand(...CONFIG.restDuration);
+                        d.x = d.y = 0;
+                    }
+                }
+            }
+
+            function draw(ctx, t) {
+                updateDrift(t);
+
+                drawBackground(ctx, t);
+                drawGrain(ctx, 0.05);
+
+                // tiny tremor so even the "resting" blob is never perfectly still
+                const jx = (noise1(t * 1.3) - 0.5) * 3;
+                const jy = (noise1(t * 1.1 + 50) - 0.5) * 3;
+                const cx = w / 2 + drift.x + jx;
+                const cy = h / 2 + drift.y + jy;
+                const R = CONFIG.blobRadius * minDim;
+
+                drawBlob(ctx, cx, cy, R, t);
+                drawCorona(ctx, cx, cy, R, t);
+                drawGrain(ctx, 0.035);
+            }
+
+            return { title: 'Visualization #1', setup, draw };
+        })();
+
+        // ---------------------------------------------------------------
+        // Page plumbing: more visualizations can be appended to this list.
+        // Pick one with the URL hash (#1, #2, ...) or the arrow keys.
+        // ---------------------------------------------------------------
+        const visualizations = [Viz1];
+        let current = 0;
+
+        const canvas = document.getElementById('stage');
+        const ctx = canvas.getContext('2d');
+        const caption = document.getElementById('caption');
+
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const w = window.innerWidth, h = window.innerHeight;
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            visualizations[current].setup(w, h, dpr, ctx);
+        }
+
+        function select(i) {
+            current = (i + visualizations.length) % visualizations.length;
+            caption.textContent = visualizations[current].title;
+            document.title = visualizations[current].title;
+            history.replaceState(null, '', '#' + (current + 1));
+            resize();
+        }
+
+        window.addEventListener('resize', resize);
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight') select(current + 1);
+            if (e.key === 'ArrowLeft') select(current - 1);
+        });
+
+        const start = performance.now();
+        function frame(now) {
+            visualizations[current].draw(ctx, (now - start) / 1000);
+            requestAnimationFrame(frame);
+        }
+
+        const fromHash = parseInt(location.hash.slice(1), 10);
+        select(Number.isInteger(fromHash) ? fromHash - 1 : 0);
+        requestAnimationFrame(frame);
+    </script>
+</body>
+
+</html>
