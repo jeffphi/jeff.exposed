@@ -305,16 +305,21 @@
                 ctx.fillStyle = glow;
                 ctx.fillRect(0, 0, w, h);
 
-                // soft, fuzzy body: many faint stacked outlines, so no visible banding
-                const layers = 56;
+                // soft, fuzzy edge: additive stacked outlines ramp evenly from the rim up to full
+                // white (normal blending stalls short of white), then a solid white core
+                const layers = 30;
+                ctx.save();
+                ctx.globalCompositeOperation = 'lighter';
+                ctx.fillStyle = `rgba(255, 255, 255, ${(1.7 / layers).toFixed(4)})`;
                 for (let i = 0; i < layers; i++) {
                     const k = i / (layers - 1);
-                    const scale = 1.04 - k * 0.80;
-                    const r = 245 + 10 * k, g = 255, b = 243 + 12 * k;
-                    ctx.fillStyle = `rgba(${r | 0}, ${g}, ${b | 0}, 0.075)`;
-                    blobPath(ctx, cx, cy, R, scale, t, i * 0.09);
+                    blobPath(ctx, cx, cy, R, 1.04 - k * 0.24, t, i * 0.02);
                     ctx.fill();
                 }
+                ctx.restore();
+                ctx.fillStyle = 'rgb(255, 255, 255)';
+                blobPath(ctx, cx, cy, R, 0.80, t, 0);
+                ctx.fill();
             }
 
             // ---- corona --------------------------------------------------
