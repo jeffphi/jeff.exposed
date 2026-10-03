@@ -140,6 +140,7 @@ async function init() {
     state.lessons = lessons;
     state.vocab = vocab;
     state.notes = notes;
+    state.filterTags = new Set(allTags());
     el.status.textContent = "";
   } catch (err) {
     el.status.textContent = `Couldn't load lesson data: ${err.message}`;
@@ -201,6 +202,34 @@ function renderFilters() {
   });
   el.filters.appendChild(lessonSelect);
 
+  const categoryLabel = document.createElement("label");
+  categoryLabel.textContent = "Categories:";
+  el.filters.appendChild(categoryLabel);
+
+  const allBtn = document.createElement("button");
+  allBtn.type = "button";
+  allBtn.className = "tag-toggle";
+  allBtn.textContent = "All";
+  allBtn.addEventListener("click", () => {
+    state.filterTags = new Set(allTags());
+    buildDeck();
+    renderFilters();
+    renderView();
+  });
+  el.filters.appendChild(allBtn);
+
+  const noneBtn = document.createElement("button");
+  noneBtn.type = "button";
+  noneBtn.className = "tag-toggle";
+  noneBtn.textContent = "None";
+  noneBtn.addEventListener("click", () => {
+    state.filterTags = new Set();
+    buildDeck();
+    renderFilters();
+    renderView();
+  });
+  el.filters.appendChild(noneBtn);
+
   allTags().forEach((tag) => {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -234,9 +263,7 @@ function buildDeck() {
   if (state.filterLesson !== "all") {
     pool = pool.filter((v) => v.lesson_id === state.filterLesson);
   }
-  if (state.filterTags.size) {
-    pool = pool.filter((v) => state.filterTags.has(v.tags));
-  }
+  pool = pool.filter((v) => state.filterTags.has(v.tags));
   if (state.hideKnown) {
     pool = pool.filter((v) => !state.known.has(cardId(v)));
   }
