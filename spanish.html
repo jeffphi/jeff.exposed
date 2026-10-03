@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spanish Study</title>
+  <meta name="description" content="Vocab flashcards and lesson notes for our Spanish class." />
+  <link rel="icon" href="/assets/Profile-J.jpg" />
+  <link rel="stylesheet" type="text/css" href="/spanish/style.css" />
+</head>
+
+<body>
+  <div id="app">
+    <header>
+      <h1>🇪🇸 Spanish Study</h1>
+      <p class="subtitle">Flashcards &amp; notes from our lessons.</p>
+    </header>
+
+    <nav id="tabs">
+      <button class="tab active" data-view="flashcards">Flashcards</button>
+      <button class="tab" data-view="notes">Notes</button>
+    </nav>
+
+    <div id="status"></div>
+    <div id="filters" class="hidden"></div>
+    <main id="view"></main>
+  </div>
+
+  <script src="/spanish/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,64 @@
+spanish,english,tags,lesson_id
+Me llamo...,My name is...,greetings,1
+Mi nombre es...,My name is... (alternate),greetings,1
+¿Cómo te llamas?,What's your name? (informal),greetings,1
+Mucho gusto,Nice to meet you,greetings,1
+Encantado(a),Delighted (nice to meet you),greetings,1
+Gusto en conocerte,Pleasure to meet you (informal),greetings,1
+Igualmente,Likewise,greetings,1
+"Hola, ¿cómo estás?","Hi, how are you?",greetings,1
+"Hola, ¿qué tal?","Hi, what's up?",greetings,1
+Buenos días,Good morning,greetings,1
+Muy bien,Very well,greetings,1
+Bastante bien,Pretty well,greetings,1
+"Muy bien, gracias","Very well, thanks",greetings,1
+Más o menos,So-so,greetings,1
+¿Qué me cuentas?,What's new with you?,greetings,1
+¡Chévere!,Cool! (slang),slang,1
+¡Pura vida!,All good / cool (Costa Rican slang),slang,1
+¡Fenomenal!,Phenomenal / great,slang,1
+Adiós,Goodbye,farewells,1
+Hasta pronto,See you soon,farewells,1
+Hasta luego,See you later,farewells,1
+Nos vemos,See you,farewells,1
+Hasta mañana,See you tomorrow,farewells,1
+Hasta la vista,See you,farewells,1
+Que te vaya bien,Have a good one,farewells,1
+Tengo que irme,I have to go,farewells,1
+Tú,You (informal),grammar,1
+Usted,You (formal),grammar,1
+Ustedes,You all (plural),grammar,1
+¿Cómo?,How?,question-words,1
+¿Qué?,What / how,question-words,1
+Entonces,So / then,filler-words,1
+Don,Title of respect before a man's first name,titles,1
+Doña,Title of respect before a woman's first name,titles,1
+Señor,Title of respect before a man's last name (Mr.),titles,1
+Señora,Title of respect before a woman's last name (Mrs./Ms.),titles,1
+a,Letter A,alphabet,1
+be,Letter B,alphabet,1
+ce,Letter C,alphabet,1
+de,Letter D,alphabet,1
+e,Letter E,alphabet,1
+efe,Letter F,alphabet,1
+ge,Letter G,alphabet,1
+hache,Letter H,alphabet,1
+i,Letter I,alphabet,1
+jota,Letter J,alphabet,1
+ka,Letter K,alphabet,1
+ele,Letter L,alphabet,1
+eme,Letter M,alphabet,1
+ene,Letter N,alphabet,1
+eñe,Letter Ñ,alphabet,1
+o,Letter O,alphabet,1
+pe,Letter P,alphabet,1
+cu,Letter Q,alphabet,1
+erre,Letter R,alphabet,1
+ese,Letter S,alphabet,1
+te,Letter T,alphabet,1
+u,Letter U,alphabet,1
+uve,Letter V,alphabet,1
+uve doble,Letter W,alphabet,1
+equis,Letter X,alphabet,1
+ye (i griega),Letter Y,alphabet,1
+zeta,Letter Z,alphabet,1
