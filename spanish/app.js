@@ -285,7 +285,8 @@ function shuffle(arr) {
 // ---------------------------------------------------------------
 function renderView() {
   if (state.view === "flashcards") renderFlashcards();
-  else renderNotes();
+  else if (state.view === "notes") renderNotes();
+  else renderLessons();
 }
 
 function renderFlashcards() {
@@ -363,10 +364,7 @@ function nav(delta) {
 
 function renderNotes() {
   el.view.innerHTML = "";
-  let notes = state.notes;
-  if (state.filterLesson !== "all") {
-    notes = notes.filter((n) => n.lesson_id === state.filterLesson);
-  }
+  const notes = state.notes;
 
   if (!notes.length) {
     el.view.innerHTML = `<div id="empty-state">No notes yet.</div>`;
@@ -387,6 +385,85 @@ function renderNotes() {
     card.querySelector("h3").textContent = n.title;
     card.querySelector("p").textContent = n.body;
     el.view.appendChild(card);
+  });
+}
+
+function renderLessons() {
+  el.view.innerHTML = "";
+  if (!state.lessons.length) {
+    el.view.innerHTML = `<div id="empty-state">No lessons yet.</div>`;
+    return;
+  }
+
+  state.lessons.forEach((lesson) => {
+    const section = document.createElement("section");
+    section.className = "lesson";
+
+    const heading = document.createElement("h2");
+    heading.textContent = `Lesson ${lesson.lesson_id}: ${lesson.title}`;
+    section.appendChild(heading);
+
+    if (lesson.date) {
+      const date = document.createElement("div");
+      date.className = "lesson-meta";
+      date.textContent = lesson.date;
+      section.appendChild(date);
+    }
+
+    if (lesson.summary) {
+      const text = document.createElement("p");
+      text.className = "lesson-summary";
+      text.textContent = lesson.summary;
+      section.appendChild(text);
+    }
+
+    state.notes
+      .filter((n) => n.lesson_id === lesson.lesson_id)
+      .forEach((n) => {
+        const card = document.createElement("div");
+        card.className = "note-card";
+        const h3 = document.createElement("h3");
+        h3.textContent = n.title;
+        const p = document.createElement("p");
+        p.textContent = n.body;
+        card.append(h3, p);
+        section.appendChild(card);
+      });
+
+    const groups = new Map();
+    state.vocab
+      .filter((v) => v.lesson_id === lesson.lesson_id)
+      .forEach((v) => {
+        const key = v.tags || "misc";
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(v);
+      });
+
+    groups.forEach((cards, tag) => {
+      const details = document.createElement("details");
+      details.className = "vocab-group";
+      details.open = tag !== "alphabet";
+
+      const label = document.createElement("summary");
+      label.textContent = `${tag} (${cards.length})`;
+      details.appendChild(label);
+
+      const table = document.createElement("table");
+      table.className = "vocab-table";
+      cards.forEach((c) => {
+        const tr = document.createElement("tr");
+        const spanish = document.createElement("td");
+        spanish.textContent = c.spanish;
+        const english = document.createElement("td");
+        english.textContent = c.english;
+        tr.append(spanish, english);
+        table.appendChild(tr);
+      });
+      details.appendChild(table);
+      section.appendChild(details);
+    });
+
+    el.view.appendChild(section);
   });
 }
 
