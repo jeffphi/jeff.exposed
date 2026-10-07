@@ -286,7 +286,8 @@ function shuffle(arr) {
 function renderView() {
   if (state.view === "flashcards") renderFlashcards();
   else if (state.view === "notes") renderNotes();
-  else renderLessons();
+  else if (state.view === "lessons") renderLessons();
+  else renderTranslate();
 }
 
 function renderFlashcards() {
@@ -464,6 +465,75 @@ function renderLessons() {
     });
 
     el.view.appendChild(section);
+  });
+}
+
+// ---------------------------------------------------------------
+// Translate (free lookup via MyMemory, no API key)
+// ---------------------------------------------------------------
+function renderTranslate() {
+  el.view.innerHTML = `
+    <div id="translate-tool">
+      <div class="translate-direction">
+        <span id="lang-from">English</span>
+        <button type="button" class="action" id="swap-langs" aria-label="Swap languages">⇄</button>
+        <span id="lang-to">Spanish</span>
+      </div>
+      <textarea id="translate-input" rows="4" placeholder="Type text to translate... (Cmd/Ctrl+Enter to translate)"></textarea>
+      <div class="controls">
+        <button type="button" class="action know" id="translate-btn">Translate</button>
+      </div>
+      <div id="translate-output" class="translate-output" aria-live="polite"></div>
+      <p class="translate-note">Free lookup via MyMemory -- quick and good for single words/phrases, not a substitute for a human.</p>
+    </div>
+  `;
+
+  let direction = "en-es";
+
+  const langFrom = document.getElementById("lang-from");
+  const langTo = document.getElementById("lang-to");
+  const input = document.getElementById("translate-input");
+  const output = document.getElementById("translate-output");
+  const translateBtn = document.getElementById("translate-btn");
+  const swapBtn = document.getElementById("swap-langs");
+
+  async function doTranslate() {
+    const text = input.value.trim();
+    if (!text) return;
+    output.textContent = "Translating...";
+    const langpair = direction === "en-es" ? "en|es" : "es|en";
+    try {
+      const res = await fetch(
+        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langpair}`
+      );
+      const data = await res.json();
+      const translated = data?.responseData?.translatedText;
+      if (!translated || /MYMEMORY WARNING/i.test(translated)) {
+        throw new Error("Translation limit reached for today -- try again tomorrow.");
+      }
+      output.textContent = translated;
+    } catch (err) {
+      output.textContent = `Couldn't translate: ${err.message}`;
+    }
+  }
+
+  translateBtn.addEventListener("click", doTranslate);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      doTranslate();
+    }
+  });
+
+  swapBtn.addEventListener("click", () => {
+    direction = direction === "en-es" ? "es-en" : "en-es";
+    langFrom.textContent = direction === "en-es" ? "English" : "Spanish";
+    langTo.textContent = direction === "en-es" ? "Spanish" : "English";
+    const prevOutput = output.textContent;
+    if (prevOutput && !/^(Translating|Couldn't)/.test(prevOutput)) {
+      input.value = prevOutput;
+    }
+    output.textContent = "";
   });
 }
 
