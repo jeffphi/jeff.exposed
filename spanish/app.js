@@ -28,11 +28,13 @@ const VERB_GROUPS = [
     stem: "habl",
     forms: [
       { pronoun: "yo", ending: "o" },
-      { pronoun: "tú", ending: "as" },
-      { pronoun: "él / ella / usted", ending: "a" },
+      { pronoun: "tú (informal)", ending: "as" },
+      { pronoun: "usted (formal)", ending: "a" },
+      { pronoun: "él / ella", ending: "a" },
       { pronoun: "nosotros / nosotras", ending: "amos" },
       { pronoun: "vosotros / vosotras", ending: "áis" },
-      { pronoun: "ellos / ellas / ustedes", ending: "an" },
+      { pronoun: "ustedes", ending: "an" },
+      { pronoun: "ellos / ellas", ending: "an" },
     ],
   },
   {
@@ -42,11 +44,13 @@ const VERB_GROUPS = [
     stem: "com",
     forms: [
       { pronoun: "yo", ending: "o" },
-      { pronoun: "tú", ending: "es" },
-      { pronoun: "él / ella / usted", ending: "e" },
+      { pronoun: "tú (informal)", ending: "es" },
+      { pronoun: "usted (formal)", ending: "e" },
+      { pronoun: "él / ella", ending: "e" },
       { pronoun: "nosotros / nosotras", ending: "emos" },
       { pronoun: "vosotros / vosotras", ending: "éis" },
-      { pronoun: "ellos / ellas / ustedes", ending: "en" },
+      { pronoun: "ustedes", ending: "en" },
+      { pronoun: "ellos / ellas", ending: "en" },
     ],
   },
   {
@@ -56,11 +60,13 @@ const VERB_GROUPS = [
     stem: "viv",
     forms: [
       { pronoun: "yo", ending: "o" },
-      { pronoun: "tú", ending: "es" },
-      { pronoun: "él / ella / usted", ending: "e" },
+      { pronoun: "tú (informal)", ending: "es" },
+      { pronoun: "usted (formal)", ending: "e" },
+      { pronoun: "él / ella", ending: "e" },
       { pronoun: "nosotros / nosotras", ending: "imos" },
       { pronoun: "vosotros / vosotras", ending: "ís" },
-      { pronoun: "ellos / ellas / ustedes", ending: "en" },
+      { pronoun: "ustedes", ending: "en" },
+      { pronoun: "ellos / ellas", ending: "en" },
     ],
   },
 ];
@@ -458,7 +464,7 @@ function verbReferenceHTML() {
       <h2>Regular Verb Conjugations (Present Tense)</h2>
       <p class="lesson-summary">The three patterns every regular verb follows, shown with the standard example verbs. The bolded part is the ending that changes; the rest is the stem.</p>
       <div class="verb-grid">${cards}</div>
-      <p class="translate-note">Vosotros/vosotras forms are used in Spain -- many Latin American-focused classes skip them.</p>
+      <p class="translate-note">Usted/ustedes share their verb form with él-ella/ellos-ellas -- same ending, different pronoun. Vosotros/vosotras forms are used in Spain -- many Latin American-focused classes skip them.</p>
     </section>
   `;
 }
