@@ -18,6 +18,53 @@ const DATA_SOURCES = {
   notes: sheetCsvUrl(1549873774),
 };
 
+// Regular present-tense conjugation patterns. Hard-coded rather than in the
+// Sheet -- this is fixed grammar, not content the group adds to week to week.
+const VERB_GROUPS = [
+  {
+    group: "-AR verbs",
+    example: "hablar",
+    meaning: "to speak",
+    stem: "habl",
+    forms: [
+      { pronoun: "yo", ending: "o" },
+      { pronoun: "tú", ending: "as" },
+      { pronoun: "él / ella / usted", ending: "a" },
+      { pronoun: "nosotros / nosotras", ending: "amos" },
+      { pronoun: "vosotros / vosotras", ending: "áis" },
+      { pronoun: "ellos / ellas / ustedes", ending: "an" },
+    ],
+  },
+  {
+    group: "-ER verbs",
+    example: "comer",
+    meaning: "to eat",
+    stem: "com",
+    forms: [
+      { pronoun: "yo", ending: "o" },
+      { pronoun: "tú", ending: "es" },
+      { pronoun: "él / ella / usted", ending: "e" },
+      { pronoun: "nosotros / nosotras", ending: "emos" },
+      { pronoun: "vosotros / vosotras", ending: "éis" },
+      { pronoun: "ellos / ellas / ustedes", ending: "en" },
+    ],
+  },
+  {
+    group: "-IR verbs",
+    example: "vivir",
+    meaning: "to live",
+    stem: "viv",
+    forms: [
+      { pronoun: "yo", ending: "o" },
+      { pronoun: "tú", ending: "es" },
+      { pronoun: "él / ella / usted", ending: "e" },
+      { pronoun: "nosotros / nosotras", ending: "imos" },
+      { pronoun: "vosotros / vosotras", ending: "ís" },
+      { pronoun: "ellos / ellas / ustedes", ending: "en" },
+    ],
+  },
+];
+
 const KNOWN_KEY = "spanish-study:known-cards";
 
 // ---------------------------------------------------------------
@@ -389,12 +436,41 @@ function renderNotes() {
   });
 }
 
+function verbReferenceHTML() {
+  const cards = VERB_GROUPS.map(
+    (g) => `
+    <div class="verb-card">
+      <h3>${g.group}</h3>
+      <div class="verb-example">${g.example} <span class="verb-meaning">(${g.meaning})</span></div>
+      <table class="verb-table">
+        ${g.forms
+          .map(
+            (f) =>
+              `<tr><td>${f.pronoun}</td><td>${g.stem}<strong>${f.ending}</strong></td></tr>`
+          )
+          .join("")}
+      </table>
+    </div>`
+  ).join("");
+
+  return `
+    <section class="lesson verb-reference">
+      <h2>Regular Verb Conjugations (Present Tense)</h2>
+      <p class="lesson-summary">The three patterns every regular verb follows, shown with the standard example verbs. The bolded part is the ending that changes; the rest is the stem.</p>
+      <div class="verb-grid">${cards}</div>
+      <p class="translate-note">Vosotros/vosotras forms are used in Spain -- many Latin American-focused classes skip them.</p>
+    </section>
+  `;
+}
+
 function renderLessons() {
   el.view.innerHTML = "";
   if (!state.lessons.length) {
     el.view.innerHTML = `<div id="empty-state">No lessons yet.</div>`;
     return;
   }
+
+  el.view.insertAdjacentHTML("beforeend", verbReferenceHTML());
 
   state.lessons.forEach((lesson) => {
     const section = document.createElement("section");

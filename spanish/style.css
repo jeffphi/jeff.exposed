@@ -311,3 +311,63 @@ button.action.know {
   font-size: 0.8rem;
   margin: 0;
 }
+
+/* Verb conjugation reference */
+.verb-reference {
+  margin-bottom: 44px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.verb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.verb-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.verb-card h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.verb-example {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.verb-meaning {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.verb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.verb-table td {
+  padding: 4px 2px;
+  border-top: 1px solid var(--border);
+}
+
+.verb-table td:first-child {
+  color: var(--muted);
+}
+
+.verb-table td:last-child {
+  text-align: right;
+}
+
+.verb-table strong {
+  color: var(--accent);
+}
