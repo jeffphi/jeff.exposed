@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/assets/Profile-J.jpg" />
+    <title>Santa Barbara Tides</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.5;
+            color: #1b2a33;
+            background: linear-gradient(160deg, #0b2f44 0%, #136a8a 45%, #3ab4c4 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #fff;
+        }
+
+        .header h1 {
+            font-size: clamp(1.6em, 5vw, 2.3em);
+            font-weight: 700;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        .header p {
+            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95em;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(8, 35, 48, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .status-card {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-now {
+            flex: 1 1 180px;
+        }
+
+        .status-now .level {
+            font-size: 2.1em;
+            font-weight: 700;
+            color: #0b5f7a;
+        }
+
+        .status-now .trend {
+            font-size: 0.95em;
+            color: #555;
+            margin-top: 2px;
+        }
+
+        .status-next {
+            flex: 1 1 220px;
+            text-align: right;
+        }
+
+        .status-next .label {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #888;
+        }
+
+        .status-next .value {
+            font-size: 1.15em;
+            font-weight: 600;
+            color: #1b2a33;
+        }
+
+        .status-next .countdown {
+            font-size: 0.9em;
+            color: #0b5f7a;
+        }
+
+        .nav-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .nav-row button {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-row button:hover {
+            background: #fff;
+        }
+
+        .nav-row input[type="date"] {
+            padding: 9px 10px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-row .today-btn {
+            font-size: 0.85em;
+            padding: 10px 12px;
+        }
+
+        #chart-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        #chart {
+            width: 100%;
+            height: 280px;
+            display: block;
+        }
+
+        .hilo-list {
+            list-style: none;
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .hilo-list li {
+            background: rgba(11, 95, 122, 0.08);
+            border-left: 4px solid #0b5f7a;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+        .hilo-list li.is-high {
+            border-left-color: #c0392b;
+            background: rgba(192, 57, 43, 0.08);
+        }
+
+        .hilo-list .hl-type {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #777;
+        }
+
+        .hilo-list .hl-time {
+            font-size: 1.05em;
+            font-weight: 600;
+        }
+
+        .hilo-list .hl-height {
+            color: #444;
+        }
+
+        .msg {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 10px;
+            padding: 16px;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.85em;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌊 Santa Barbara Tides</h1>
+            <p>NOAA station 9411340 &middot; Santa Barbara, CA</p>
+        </div>
+
+        <div class="card status-card" id="status-card">
+            <div class="msg">Loading current conditions&hellip;</div>
+        </div>
+
+        <div class="card">
+            <div class="nav-row">
+                <button id="prev-day" aria-label="Previous day">&larr;</button>
+                <input type="date" id="date-picker">
+                <button id="next-day" aria-label="Next day">&rarr;</button>
+                <button id="today-btn" class="today-btn">Today</button>
+            </div>
+            <div id="chart-wrap">
+                <canvas id="chart"></canvas>
+            </div>
+            <ul class="hilo-list" id="hilo-list"></ul>
+        </div>
+
+        <div class="footer">
+            Predicted tides from the <a href="https://tidesandcurrents.noaa.gov/noaatidepredictions.html?id=9411340"
+                target="_blank">NOAA CO-OPS API</a>, datum MLLW, local Pacific time.
+        </div>
+    </div>
+
+    <script>
+        const STATION = "9411340";
+        const API_BASE = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter";
+        const TZ = "America/Los_Angeles";
+
+        const datePicker = document.getElementById("date-picker");
+        const statusCard = document.getElementById("status-card");
+        const hiloList = document.getElementById("hilo-list");
+        const chartWrap = document.getElementById("chart-wrap");
+        const canvas = document.getElementById("chart");
+
+        function pad(n) { return String(n).padStart(2, "0"); }
+
+        // Treat date-only strings as plain calendar math, done at UTC noon so
+        // DST transitions in any timezone can't shift the calendar date.
+        function addDays(dateStr, days) {
+            const d = new Date(dateStr + "T12:00:00Z");
+            d.setUTCDate(d.getUTCDate() + days);
+            return d.toISOString().slice(0, 10);
+        }
+
+        function sbTodayStr() {
+            return new Intl.DateTimeFormat("en-CA", {
+                timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit"
+            }).format(new Date());
+        }
+
+        function sbNowString() {
+            const parts = new Intl.DateTimeFormat("en-CA", {
+                timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit",
+                hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+            }).formatToParts(new Date());
+            const get = t => parts.find(p => p.type === t).value;
+            return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}`;
+        }
+
+        function compactDate(dateStr) {
+            return dateStr.replaceAll("-", "");
+        }
+
+        function formatTime(tStr) {
+            const [, timePart] = tStr.split(" ");
+            let [h, m] = timePart.split(":").map(Number);
+            const ampm = h >= 12 ? "PM" : "AM";
+            h = h % 12;
+            if (h === 0) h = 12;
+            return `${h}:${pad(m)} ${ampm}`;
+        }
+
+        function minutesBetween(fromStr, toStr) {
+            const from = new Date(fromStr.replace(" ", "T") + ":00Z");
+            const to = new Date(toStr.replace(" ", "T") + ":00Z");
+            return Math.round((to - from) / 60000);
+        }
+
+        function formatCountdown(mins) {
+            if (mins < 0) mins = 0;
+            const h = Math.floor(mins / 60);
+            const m = mins % 60;
+            if (h === 0) return `in ${m}m`;
+            return `in ${h}h ${m}m`;
+        }
+
+        async function fetchPredictions(params) {
+            const url = new URL(API_BASE);
+            const allParams = {
+                station: STATION,
+                product: "predictions",
+                datum: "MLLW",
+                time_zone: "lst_ldt",
+                units: "english",
+                format: "json",
+                application: "jeff.exposed-tides",
+                ...params,
+            };
+            Object.entries(allParams).forEach(([k, v]) => url.searchParams.set(k, v));
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`NOAA API error: ${res.status}`);
+            const data = await res.json();
+            if (data.error) throw new Error(data.error.message || "NOAA API error");
+            return data.predictions || [];
+        }
+
+        async function loadStatus() {
+            try {
+                const today = sbTodayStr();
+                const begin = compactDate(addDays(today, -1));
+                const end = compactDate(addDays(today, 2));
+                const [hilo, curve] = await Promise.all([
+                    fetchPredictions({ begin_date: begin, end_date: end, interval: "hilo" }),
+                    fetchPredictions({ begin_date: compactDate(today), end_date: compactDate(today), interval: "6" }),
+                ]);
+                renderStatus(hilo, curve);
+            } catch (err) {
+                statusCard.innerHTML = `<div class="msg">Couldn't load current conditions: ${err.message}</div>`;
+            }
+        }
+
+        function renderStatus(hilo, curve) {
+            const now = sbNowString();
+
+            let current = null;
+            for (const p of curve) {
+                if (p.t <= now) current = p; else break;
+            }
+
+            let trendText = "";
+            if (current) {
+                const idx = curve.indexOf(current);
+                const prev = curve[Math.max(0, idx - 1)];
+                if (prev && prev !== current) {
+                    const diff = parseFloat(current.v) - parseFloat(prev.v);
+                    trendText = diff > 0.005 ? "Rising" : diff < -0.005 ? "Falling" : "Steady";
+                }
+            }
+
+            const upcoming = hilo.filter(p => p.t > now);
+            const next = upcoming[0];
+            const after = upcoming[1];
+
+            let html = "";
+            html += `<div class="status-now">`;
+            html += current
+                ? `<div class="level">${parseFloat(current.v).toFixed(1)} ft</div><div class="trend">${trendText ? trendText + " now" : "Right now"}</div>`
+                : `<div class="level">&ndash;</div><div class="trend">No current reading</div>`;
+            html += `</div>`;
+
+            if (next) {
+                const typeLabel = next.type === "H" ? "High tide" : "Low tide";
+                html += `<div class="status-next">`;
+                html += `<div class="label">Next &mdash; ${typeLabel}</div>`;
+                html += `<div class="value">${formatTime(next.t)} &middot; ${parseFloat(next.v).toFixed(1)} ft</div>`;
+                html += `<div class="countdown">${formatCountdown(minutesBetween(now, next.t))}</div>`;
+                html += `</div>`;
+            }
+
+            statusCard.innerHTML = html;
+            statusCard._afterLabel = after;
+        }
+
+        let dayCurve = [];
+        let dayHilo = [];
+
+        async function loadDay(dateStr) {
+            chartWrap.innerHTML = '<div class="msg">Loading tide chart&hellip;</div>';
+            hiloList.innerHTML = "";
+            try {
+                const compact = compactDate(dateStr);
+                const beginHilo = compactDate(addDays(dateStr, -1));
+                const endHilo = compactDate(addDays(dateStr, 1));
+                const [curve, hilo] = await Promise.all([
+                    fetchPredictions({ begin_date: compact, end_date: compact, interval: "6" }),
+                    fetchPredictions({ begin_date: beginHilo, end_date: endHilo, interval: "hilo" }),
+                ]);
+                dayCurve = curve;
+                dayHilo = hilo.filter(p => p.t.slice(0, 10) === dateStr);
+                chartWrap.innerHTML = '<canvas id="chart"></canvas>';
+                drawChart(dateStr, curve, dayHilo);
+                renderHiloList(dayHilo);
+            } catch (err) {
+                chartWrap.innerHTML = `<div class="msg">Couldn't load tide data: ${err.message}</div>`;
+            }
+        }
+
+        function renderHiloList(hilo) {
+            if (hilo.length === 0) {
+                hiloList.innerHTML = "";
+                return;
+            }
+            hiloList.innerHTML = hilo.map(p => {
+                const isHigh = p.type === "H";
+                return `<li class="${isHigh ? "is-high" : ""}">
+                    <div class="hl-type">${isHigh ? "High" : "Low"} tide</div>
+                    <div class="hl-time">${formatTime(p.t)}</div>
+                    <div class="hl-height">${parseFloat(p.v).toFixed(1)} ft</div>
+                </li>`;
+            }).join("");
+        }
+
+        function drawChart(dateStr, curve, hilo) {
+            const c = document.getElementById("chart");
+            const wrapWidth = chartWrap.clientWidth || 600;
+            const cssHeight = 280;
+            const dpr = window.devicePixelRatio || 1;
+            c.width = wrapWidth * dpr;
+            c.height = cssHeight * dpr;
+            c.style.width = wrapWidth + "px";
+            c.style.height = cssHeight + "px";
+            const ctx = c.getContext("2d");
+            ctx.scale(dpr, dpr);
+
+            if (curve.length === 0) {
+                ctx.fillStyle = "#666";
+                ctx.font = "14px sans-serif";
+                ctx.fillText("No data for this day", 20, 40);
+                return;
+            }
+
+            const padL = 38, padR = 12, padT = 16, padB = 28;
+            const plotW = wrapWidth - padL - padR;
+            const plotH = cssHeight - padT - padB;
+
+            const values = curve.map(p => parseFloat(p.v));
+            let minV = Math.min(...values), maxV = Math.max(...values);
+            const span = maxV - minV || 1;
+            minV -= span * 0.12;
+            maxV += span * 0.12;
+
+            const xForIdx = i => padL + (i / (curve.length - 1)) * plotW;
+            const yForV = v => padT + plotH - ((v - minV) / (maxV - minV)) * plotH;
+
+            // y gridlines (whole feet)
+            ctx.strokeStyle = "#e3e3e3";
+            ctx.fillStyle = "#888";
+            ctx.font = "11px sans-serif";
+            ctx.lineWidth = 1;
+            const yStart = Math.ceil(minV);
+            for (let ft = yStart; ft <= maxV; ft++) {
+                const y = yForV(ft);
+                ctx.beginPath();
+                ctx.moveTo(padL, y);
+                ctx.lineTo(padL + plotW, y);
+                ctx.stroke();
+                ctx.fillText(`${ft} ft`, 2, y + 4);
+            }
+
+            // x gridlines every 4 hours
+            for (let h = 0; h <= 24; h += 4) {
+                const target = `${dateStr} ${pad(h)}:00`;
+                let idx = curve.findIndex(p => p.t >= target);
+                if (idx === -1) idx = curve.length - 1;
+                const x = xForIdx(idx);
+                ctx.beginPath();
+                ctx.moveTo(x, padT);
+                ctx.lineTo(x, padT + plotH);
+                ctx.stroke();
+                const label = h === 0 ? "12a" : h === 12 ? "12p" : h < 12 ? `${h}a` : `${h - 12}p`;
+                ctx.fillText(label, x - 10, cssHeight - 10);
+            }
+
+            // water level curve
+            ctx.beginPath();
+            ctx.strokeStyle = "#0b5f7a";
+            ctx.lineWidth = 2.5;
+            curve.forEach((p, i) => {
+                const x = xForIdx(i);
+                const y = yForV(parseFloat(p.v));
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // fill under curve
+            ctx.lineTo(xForIdx(curve.length - 1), padT + plotH);
+            ctx.lineTo(padL, padT + plotH);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(58, 180, 196, 0.18)";
+            ctx.fill();
+
+            // high/low markers
+            hilo.forEach(p => {
+                let idx = curve.findIndex(cp => cp.t >= p.t);
+                if (idx === -1) idx = curve.length - 1;
+                const x = xForIdx(idx);
+                const v = parseFloat(p.v);
+                const y = yForV(v);
+                const isHigh = p.type === "H";
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, 2 * Math.PI);
+                ctx.fillStyle = isHigh ? "#c0392b" : "#0b5f7a";
+                ctx.fill();
+
+                ctx.fillStyle = "#333";
+                ctx.font = "11px sans-serif";
+                const label = `${v.toFixed(1)}ft ${formatTime(p.t)}`;
+                const labelY = isHigh ? y - 10 : y + 16;
+                const labelX = Math.min(Math.max(x - 28, padL), padL + plotW - 56);
+                ctx.fillText(label, labelX, labelY);
+            });
+
+            // "now" marker if viewing today
+            const today = sbTodayStr();
+            if (dateStr === today) {
+                const now = sbNowString();
+                let idx = curve.findIndex(p => p.t >= now);
+                if (idx !== -1) {
+                    const x = xForIdx(idx);
+                    ctx.beginPath();
+                    ctx.setLineDash([4, 4]);
+                    ctx.strokeStyle = "#e67e22";
+                    ctx.lineWidth = 1.5;
+                    ctx.moveTo(x, padT);
+                    ctx.lineTo(x, padT + plotH);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            }
+        }
+
+        function setDate(dateStr) {
+            datePicker.value = dateStr;
+            loadDay(dateStr);
+        }
+
+        datePicker.addEventListener("change", () => setDate(datePicker.value));
+        document.getElementById("prev-day").addEventListener("click", () => setDate(addDays(datePicker.value, -1)));
+        document.getElementById("next-day").addEventListener("click", () => setDate(addDays(datePicker.value, 1)));
+        document.getElementById("today-btn").addEventListener("click", () => setDate(sbTodayStr()));
+
+        window.addEventListener("resize", () => {
+            if (dayCurve.length) drawChart(datePicker.value, dayCurve, dayHilo);
+        });
+
+        setDate(sbTodayStr());
+        loadStatus();
+    </script>
+</body>
+
+</html>
