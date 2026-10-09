@@ -62,3 +62,139 @@ uve doble,Letter W,alphabet,1
 equis,Letter X,alphabet,1
 ye (i griega),Letter Y,alphabet,1
 zeta,Letter Z,alphabet,1
+trabajar,To work,ar-verbs,2
+planear,To plan,ar-verbs,2
+necesitar,To need,ar-verbs,2
+mirar,To look at,ar-verbs,2
+llamar,To call,ar-verbs,2
+hablar,To talk,ar-verbs,2
+estudiar,To study,ar-verbs,2
+esperar,"To hope, to wait",ar-verbs,2
+enseñar,To teach,ar-verbs,2
+disfrutar,To enjoy,ar-verbs,2
+comprar,To buy,ar-verbs,2
+caminar,To walk,ar-verbs,2
+buscar,To look for,ar-verbs,2
+ver,To see,er-verbs,2
+vender,To sell,er-verbs,2
+prometer,To promise,er-verbs,2
+leer,To read,er-verbs,2
+escoger,To choose,er-verbs,2
+deber,"Ought to, should",er-verbs,2
+creer (que),"To believe, to think",er-verbs,2
+correr,To run,er-verbs,2
+comprender,To understand,er-verbs,2
+comer,To eat,er-verbs,2
+aprender,To learn,er-verbs,2
+asistir,To attend,ir-verbs,2
+recibir,To receive,ir-verbs,2
+escribir,To write,ir-verbs,2
+abrir,To open,ir-verbs,2
+Hay,"There is, there are",grammar,2
+¿Por qué?,Why,question-words,2
+¿Quién?,Who,question-words,2
+¿Cuánto?,How much,question-words,2
+¿Cuándo?,When,question-words,2
+¿Dónde?,Where,question-words,2
+Lugar,Place,basic-vocab,2
+Caro,Expensive,basic-vocab,2
+Barato,Inexpensive,basic-vocab,2
+Lejos,Far,basic-vocab,2
+Cerca,Near,basic-vocab,2
+Amigo,Friend,basic-vocab,2
+Quizás,Perhaps,basic-vocab,2
+Ojalá,Hopefully,basic-vocab,2
+Abajo,Down,basic-vocab,2
+Arriba,Up,basic-vocab,2
+Dinero,Money,basic-vocab,2
+Sin,Without,basic-vocab,2
+Con,With,basic-vocab,2
+Nadie,No one,basic-vocab,2
+Nada,Nothing,basic-vocab,2
+Nunca,Never,basic-vocab,2
+Siempre,Always,basic-vocab,2
+Todos,Everyone,basic-vocab,2
+Ayer,Yesterday,basic-vocab,2
+Hoy día,Today,basic-vocab,2
+Ahora,Now,basic-vocab,2
+Fácil,Easy,basic-vocab,2
+Difícil,Difficult,basic-vocab,2
+Mañana,Tomorrow,basic-vocab,2
+Rápido,Fast,basic-vocab,2
+Despacio,Slow,basic-vocab,2
+Pronto,Soon,basic-vocab,2
+A veces,Sometimes,basic-vocab,2
+A menudo,Often,basic-vocab,2
+Semana,Week,basic-vocab,2
+Año,Year,basic-vocab,2
+Hora,Hour,basic-vocab,2
+Lo siento,I am sorry,basic-vocab,2
+Así que,So,basic-vocab,2
+Porque,Because,basic-vocab,2
+Pero,But,basic-vocab,2
+El fin,The end,basic-vocab,2
+Gente,People,basic-vocab,2
+Una vez,One time,basic-vocab,2
+Mucho,Very much,basic-vocab,2
+Sí,Yes,basic-vocab,2
+Si,If,basic-vocab,2
+Tatarabuelo/a,Great-great-grandfather/mother,family,2
+Bisabuelo/a,Great-grandfather/mother,family,2
+Abuelo/a,Grandfather/grandmother,family,2
+Nieto/a,Grandson/granddaughter,family,2
+Padres,Parents,family,2
+Madre,Mother,family,2
+Padre,Father,family,2
+Hijos,Children,family,2
+Hijo/a,Son/daughter,family,2
+Esposo/a,Husband/wife,family,2
+Hermano/a,Brother/sister,family,2
+Compadre,Godfather of your child (or close friend),family,2
+Comadre,Godmother of your child (or close friend),family,2
+Padrino,Godfather,family,2
+Madrina,Godmother,family,2
+Ahijado/a,Godchild,family,2
+Vecino/a,Neighbor,nonfamily-relationships,2
+Compañero/a de cuarto,Roommate,nonfamily-relationships,2
+Compañero/a,Companion,nonfamily-relationships,2
+Novio/a,Boyfriend/girlfriend,nonfamily-relationships,2
+Soltero/a,Single,nonfamily-relationships,2
+Casado/a,Married,nonfamily-relationships,2
+Comprometido/a,Engaged,nonfamily-relationships,2
+Divorciado/a,Divorced,nonfamily-relationships,2
+Viudo/a,Widower/widow,nonfamily-relationships,2
+Señor,"Man, gentleman, Mr.",personal-titles,2
+Señora,"Woman, lady, Mrs.",personal-titles,2
+Señorita,"Young lady, Miss",personal-titles,2
+El hombre,Man,personal-titles,2
+La mujer,Woman,personal-titles,2
+Joven,Young man/woman,personal-titles,2
+Muchacho/a,Boy/girl,personal-titles,2
+Chico/a,Boy/girl,personal-titles,2
+Abogado/a,Lawyer,occupations,2
+Ama de casa,Housewife,occupations,2
+Enfermero/a,Nurse,occupations,2
+Médico/a,Doctor,occupations,2
+Profesor/a,Teacher,occupations,2
+Presidente,President,occupations,2
+Piloto,Pilot,occupations,2
+Panadero/a,Baker,occupations,2
+Gerente,Manager,occupations,2
+Jefe,"Boss, chief",occupations,2
+Científico/a,Scientist,occupations,2
+Campesino/a,Farmer,occupations,2
+Carnicero/a,Butcher,occupations,2
+Chófer,"Chauffeur, driver",occupations,2
+Secretario/a,Secretary,occupations,2
+Soldado,Soldier,occupations,2
+Policía,Police officer,occupations,2
+"Alegre, feliz",Happy,descriptions,2
+Bueno/a,Good,descriptions,2
+Malo/a,Bad,descriptions,2
+Cansado/a,Tired,descriptions,2
+Débil,Weak,descriptions,2
+Fuerte,Strong,descriptions,2
+Hermoso/a,Beautiful,descriptions,2
+Inteligente,Intelligent,descriptions,2
+Viejo/a,Old,descriptions,2
+Feo/a,Ugly,descriptions,2

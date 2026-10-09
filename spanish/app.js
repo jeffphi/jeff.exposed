@@ -23,9 +23,9 @@ const DATA_SOURCES = {
 const VERB_GROUPS = [
   {
     group: "-AR verbs",
-    example: "hablar",
-    meaning: "to speak",
-    stem: "habl",
+    example: "desear",
+    meaning: "to want, to wish",
+    stem: "dese",
     forms: [
       { pronoun: "yo", ending: "o" },
       { pronoun: "tú (informal)", ending: "as" },
@@ -39,9 +39,9 @@ const VERB_GROUPS = [
   },
   {
     group: "-ER verbs",
-    example: "comer",
-    meaning: "to eat",
-    stem: "com",
+    example: "vender",
+    meaning: "to sell",
+    stem: "vend",
     forms: [
       { pronoun: "yo", ending: "o" },
       { pronoun: "tú (informal)", ending: "es" },
