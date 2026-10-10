@@ -386,10 +386,27 @@ function renderFlashcards() {
     state.known.has(cardId(card)) ? "✓ Known" : "Mark known",
     () => {
       const id = cardId(card);
-      if (state.known.has(id)) state.known.delete(id);
-      else state.known.add(id);
+      if (state.known.has(id)) {
+        // Unmark (correcting a mistake) -- stay put, no advance.
+        state.known.delete(id);
+        saveKnown(state.known);
+        renderFlashcards();
+        return;
+      }
+
+      state.known.add(id);
       saveKnown(state.known);
-      renderFlashcards();
+
+      if (state.hideKnown) {
+        // Drop it from the live deck now, instead of waiting for the next
+        // filter change to rebuild (which would also reshuffle/reset).
+        state.deck.splice(state.index, 1);
+        state.index = state.deck.length ? state.index % state.deck.length : 0;
+        state.flipped = false;
+        renderFlashcards();
+      } else {
+        nav(1);
+      }
     }
   );
   knowBtn.classList.add("know");
