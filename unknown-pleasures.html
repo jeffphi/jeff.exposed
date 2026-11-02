@@ -106,12 +106,10 @@
             const spacing = chartH / (ROWS - 1);
             const marginX = W * 0.08;
             const chartW = W - marginX * 2;
-            const maxPeak = spacing * 5.2;
+            const maxPeak = spacing * 7.5;
 
             for (let i = 0; i < ROWS; i++) {
                 const baseline = marginTop + i * spacing;
-                const rowNorm = (i - (ROWS - 1) / 2) / (ROWS / 2); // -1..1
-                const rowEnv = Math.exp(-(rowNorm * rowNorm) / (2 * 0.38 * 0.38));
                 const seed = rowSeeds[i];
 
                 const pts = [];
@@ -127,7 +125,7 @@
 
                     const spike = Math.pow(Math.max(0, fine * cluster), 2.1);
                     const mod = 0.35 + 0.65 * slow;
-                    const amp = spike * mod * rowEnv * xEnv * maxPeak;
+                    const amp = spike * mod * xEnv * maxPeak;
 
                     // Small animated hand-drawn jitter, present across the
                     // whole line (including the flat outer stretches) so
