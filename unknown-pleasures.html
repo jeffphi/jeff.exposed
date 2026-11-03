@@ -106,7 +106,7 @@
             const spacing = chartH / (ROWS - 1);
             const marginX = W * 0.08;
             const chartW = W - marginX * 2;
-            const maxPeak = spacing * 15.5;
+            const maxPeak = spacing * 19;
             const ACTIVE_HALF = 0.17; // half-width (fraction of chart width) of the full-amplitude center zone
             const ACTIVE_FALLOFF = 0.1; // width of the transition band outside that zone
 
@@ -129,11 +129,11 @@
                         xEnv = 1 - u * u * (3 - 2 * u); // smoothstep falloff
                     }
 
-                    const cluster = fbm1(xn * 2.7 + seed * 3.1 + t * 0.8, 2);
+                    const cluster = fbm1(xn * 2 + seed * 3.1 + t * 0.8, 2);
                     // Ridge noise: folds a smooth noise field into sharp,
                     // cusped peaks (like ridged-multifractal terrain) rather
                     // than the round-topped bumps plain value noise gives.
-                    const fineRaw = noise1(xn * 15 + seed * 9.7 + t * 1.6);
+                    const fineRaw = noise1(xn * 9 + seed * 9.7 + t * 1.6);
                     const fine = 1 - Math.abs(fineRaw * 2 - 1);
                     const slow = fbm1(seed * 5 + t + xn * 1.3, 2);
 
