@@ -160,10 +160,13 @@
                     // whole line (including the flat outer stretches) so
                     // nothing is ever perfectly straight. Two layers at
                     // different frequencies give a grainier, more analog
-                    // texture than a single smooth wobble.
+                    // texture than a single smooth wobble. Scale it up a
+                    // bit on the peaks themselves (by amp01) so the climbs
+                    // aren't glass-smooth -- flat sections stay subtle.
+                    const jitterScale = 1 + amp01 * 2.2;
                     const jitter =
-                        (noise1(xn * 90 + seed * 13.7 + t * 2.2) - 0.5) * spacing * 0.09 +
-                        (noise1(xn * 260 + seed * 31.4 + t * 4.1) - 0.5) * spacing * 0.11;
+                        (noise1(xn * 90 + seed * 13.7 + t * 2.2) - 0.5) * spacing * 0.09 * jitterScale +
+                        (noise1(xn * 260 + seed * 31.4 + t * 4.1) - 0.5) * spacing * 0.11 * jitterScale;
 
                     pts.push([x, baseline - amp + jitter]);
                 }
