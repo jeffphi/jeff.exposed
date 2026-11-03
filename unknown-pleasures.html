@@ -130,7 +130,7 @@
             const spacing = chartH / (ROWS - 1);
             const marginX = W * 0.08;
             const chartW = W - marginX * 2;
-            const maxPeak = spacing * 19;
+            const maxPeak = spacing * 11.5;
 
             for (let i = 0; i < ROWS; i++) {
                 const baseline = marginTop + i * spacing;
@@ -158,8 +158,12 @@
 
                     // Small animated hand-drawn jitter, present across the
                     // whole line (including the flat outer stretches) so
-                    // nothing is ever perfectly straight.
-                    const jitter = (noise1(xn * 90 + seed * 13.7 + t * 2.2) - 0.5) * spacing * 0.07;
+                    // nothing is ever perfectly straight. Two layers at
+                    // different frequencies give a grainier, more analog
+                    // texture than a single smooth wobble.
+                    const jitter =
+                        (noise1(xn * 90 + seed * 13.7 + t * 2.2) - 0.5) * spacing * 0.09 +
+                        (noise1(xn * 260 + seed * 31.4 + t * 4.1) - 0.5) * spacing * 0.11;
 
                     pts.push([x, baseline - amp + jitter]);
                 }
