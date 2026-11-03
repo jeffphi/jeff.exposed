@@ -150,7 +150,7 @@
                         const d = Math.abs(xn - p.center);
                         if (d < p.width) {
                             const tent = 1 - d / p.width;
-                            const shaped = Math.pow(tent, 0.95) * p.height;
+                            const shaped = Math.pow(tent, 0.8) * p.height;
                             if (shaped > amp01) amp01 = shaped;
                         }
                     }
