@@ -112,7 +112,7 @@
                 const kSeed = seed * 1.7 + k * 5.37;
                 const centerJitter = hash(kSeed) * 2 - 1; // -1..1
                 const center = 0.5 + centerJitter * ACTIVE_HALF * 0.85;
-                const width = 0.035 + hash(kSeed + 2.1) * 0.05;
+                const width = 0.022 + hash(kSeed + 2.1) * 0.032;
                 const baseHeight = 0.5 + hash(kSeed + 4.4) * 0.5;
                 const phase = seed * 3 + k * 7.9;
                 const breathe = 0.45 + 0.55 * fbm1(t * 0.9 + phase, 2);
@@ -150,7 +150,7 @@
                         const d = Math.abs(xn - p.center);
                         if (d < p.width) {
                             const tent = 1 - d / p.width;
-                            const shaped = Math.pow(tent, 0.7) * p.height;
+                            const shaped = Math.pow(tent, 0.95) * p.height;
                             if (shaped > amp01) amp01 = shaped;
                         }
                     }
