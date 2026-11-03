@@ -163,6 +163,15 @@
                             if (shaped > amp01) amp01 = shaped;
                         }
                     }
+                    // The tent gives the overall envelope (where peaks are,
+                    // how tall), but a clean power curve on its own reads
+                    // as a straight/mechanical line. Multiply by a mid-
+                    // frequency noise field so the climb and descent are
+                    // themselves bumpy/irregular, like real noisy data
+                    // riding on top of the envelope, not a smooth ramp.
+                    const flankNoise = 0.6 + 0.55 * fbm1(xn * 34 + seed * 12.4 + t * 1.3, 3);
+                    amp01 *= flankNoise;
+
                     const amp = amp01 * maxPeak;
 
                     // Small animated hand-drawn jitter, present across the
