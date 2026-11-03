@@ -106,17 +106,24 @@
         // the row seed), only height breathes with t, so the overall
         // silhouette stays coherent while still animating.
         function rowPeaks(seed, t) {
-            const count = 1 + Math.floor(hash(seed * 0.731) * 3); // 1..3 peaks
+            // 0..3 peaks -- some rows carry no standout peak at all, just
+            // noise, which is part of what makes the real print's rows
+            // look varied rather than templated.
+            const count = Math.floor(hash(seed * 0.731) * 4);
             const peaks = [];
             for (let k = 0; k < count; k++) {
                 const kSeed = seed * 1.7 + k * 5.37;
                 const centerJitter = hash(kSeed) * 2 - 1; // -1..1
                 const center = 0.5 + centerJitter * ACTIVE_HALF * 0.85;
                 const width = 0.022 + hash(kSeed + 2.1) * 0.032;
+                // Independent left/right widths -- real pulse shapes rise
+                // and fall at different rates, not a symmetric tent.
+                const leftWidth = width * (0.65 + hash(kSeed + 6.6) * 0.7);
+                const rightWidth = width * (0.65 + hash(kSeed + 8.8) * 0.7);
                 const baseHeight = 0.5 + hash(kSeed + 4.4) * 0.5;
                 const phase = seed * 3 + k * 7.9;
                 const breathe = 0.45 + 0.55 * fbm1(t * 0.9 + phase, 2);
-                peaks.push({ center, width, height: baseHeight * breathe });
+                peaks.push({ center, leftWidth, rightWidth, height: baseHeight * breathe });
             }
             return peaks;
         }
@@ -147,9 +154,11 @@
                     // so the flanks bulge outward instead of scooping in.
                     let amp01 = 0;
                     for (const p of peaks) {
-                        const d = Math.abs(xn - p.center);
-                        if (d < p.width) {
-                            const tent = 1 - d / p.width;
+                        const d = xn - p.center;
+                        const w = d < 0 ? p.leftWidth : p.rightWidth;
+                        const ad = Math.abs(d);
+                        if (ad < w) {
+                            const tent = 1 - ad / w;
                             const shaped = Math.pow(tent, 0.8) * p.height;
                             if (shaped > amp01) amp01 = shaped;
                         }
@@ -158,17 +167,24 @@
 
                     // Small animated hand-drawn jitter, present across the
                     // whole line (including the flat outer stretches) so
-                    // nothing is ever perfectly straight. Two layers at
-                    // different frequencies give a grainier, more analog
-                    // texture than a single smooth wobble. Scale it up a
-                    // bit on the peaks themselves (by amp01) so the climbs
-                    // aren't glass-smooth -- flat sections stay subtle.
+                    // nothing is ever perfectly straight. Two smooth layers
+                    // at different frequencies give an organic wobble;
+                    // scale it up a bit on the peaks (by amp01) so climbs
+                    // aren't glass-smooth.
                     const jitterScale = 1 + amp01 * 2.2;
                     const jitter =
                         (noise1(xn * 90 + seed * 13.7 + t * 2.2) - 0.5) * spacing * 0.09 * jitterScale +
                         (noise1(xn * 260 + seed * 31.4 + t * 4.1) - 0.5) * spacing * 0.11 * jitterScale;
 
-                    pts.push([x, baseline - amp + jitter]);
+                    // Un-interpolated per-sample "static" -- real analog
+                    // noise, not a smooth wave. Refreshes a handful of
+                    // times a second rather than every frame, like a
+                    // flickering signal rather than a shimmer.
+                    const grainSeedT = Math.floor(t * 40);
+                    const grain = (hash(s * 12.9898 + seed * 78.233 + grainSeedT * 3.7) - 0.5) *
+                        spacing * (0.05 + amp01 * 0.16);
+
+                    pts.push([x, baseline - amp + jitter + grain]);
                 }
 
                 // Occluding fill: blacks out anything earlier rows drew
