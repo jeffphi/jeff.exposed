@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>Cholesterol Trends</title>
+  <meta name="description" content="Combined lipid panel trend across two health systems." />
+  <link rel="icon" href="/assets/Profile-J.jpg" />
+  <style>
+    :root {
+      --bg: #111;
+      --panel: #1a1a1a;
+      --text: #ececec;
+      --muted: #9a9a9a;
+      --line: #2a2a2a;
+      --accent: #7dd3fc;
+      --band: rgba(125, 211, 252, 0.08);
+      --high: #f3a380;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.6rem;
+    }
+
+    .subtitle {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .caveat {
+      margin: 0 0 32px;
+      padding: 12px 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    #status {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .chart-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 18px 18px 10px;
+      margin-bottom: 20px;
+    }
+
+    .chart-card h2 {
+      margin: 0 0 2px;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .chart-card .range-note {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    svg.chart {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+
+    .chart .gridline {
+      stroke: var(--line);
+      stroke-width: 1;
+    }
+
+    .chart .axis-label {
+      fill: var(--muted);
+      font-size: 10px;
+    }
+
+    .chart .band {
+      fill: var(--band);
+    }
+
+    .chart .line {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chart .dot {
+      fill: var(--accent);
+      stroke: var(--panel);
+      stroke-width: 2;
+      cursor: pointer;
+    }
+
+    .chart .dot.high {
+      fill: var(--high);
+    }
+
+    .chart .high-label {
+      fill: var(--high);
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .chart .end-label {
+      fill: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #000;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: var(--text);
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      z-index: 10;
+      white-space: nowrap;
+    }
+
+    .tooltip .tt-high {
+      color: var(--high);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 36px;
+      font-size: 0.85rem;
+    }
+
+    caption {
+      text-align: left;
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    th,
+    td {
+      text-align: right;
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    th:first-child,
+    td:first-child,
+    th:nth-child(2),
+    td:nth-child(2) {
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    td.high {
+      color: var(--high);
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>Cholesterol Trends</h1>
+    <p class="subtitle">
+      A combined view of lipid panel results pulled from two separate health-system
+      portals, neither of which will chart the other's data.
+    </p>
+    <p class="caveat">
+      Reference bands shown below are general desirable thresholds, not exact
+      per-lab normal ranges &mdash; the two source systems use slightly different
+      cutoffs (e.g. non-HDL &lt;130 vs. &lt;159). See the table at the bottom for
+      each system's own high/normal flag. This is a personal tracking page, not
+      medical advice.
+    </p>
+
+    <div id="status">Loading…</div>
+    <div id="charts"></div>
+    <div id="table-wrap"></div>
+  </main>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    // ---------------------------------------------------------------
+    // Data source: a privately-shared Google Sheet (CSV export), same
+    // pattern as /spanish/app.js. Nothing in this repo holds the real
+    // numbers -- only this fetch URL, which requires the sheet's
+    // sharing link to resolve.
+    // ---------------------------------------------------------------
+    const SHEET_ID = "";
+    const SHEET_GID = "";
+    const DATA_URL = SHEET_ID
+      ? `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`
+      : null;
+
+    const el = {
+      status: document.getElementById("status"),
+      charts: document.getElementById("charts"),
+      tableWrap: document.getElementById("table-wrap"),
+      tooltip: document.getElementById("tooltip"),
+    };
+
+    // ---- tiny RFC4180-ish CSV parser (quote-aware) -----------------
+    function parseCSV(text) {
+      const rows = [];
+      let row = [], field = "", inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQuotes) {
+          if (c === '"') {
+            if (text[i + 1] === '"') { field += '"'; i++; }
+            else inQuotes = false;
+          } else field += c;
+        } else if (c === '"') inQuotes = true;
+        else if (c === ",") { row.push(field); field = ""; }
+        else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+        else if (c === "\r") { /* skip */ }
+        else field += c;
+      }
+      if (field.length || row.length) { row.push(field); rows.push(row); }
+      return rows.filter((r) => r.some((f) => f.trim() !== ""));
+    }
+
+    function csvToObjects(text) {
+      const rows = parseCSV(text);
+      const header = rows[0].map((h) => h.trim());
+      return rows.slice(1).map((r) => {
+        const obj = {};
+        header.forEach((h, i) => (obj[h] = (r[i] || "").trim()));
+        return obj;
+      });
+    }
+
+    async function loadCSV(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+      return csvToObjects(await res.text());
+    }
+
+    const METRICS = [
+      { key: "total_cholesterol", highKey: "total_high", label: "Total Cholesterol", range: { type: "below", value: 200 } },
+      { key: "ldl", highKey: "ldl_high", label: "LDL Cholesterol", range: { type: "below", value: 100 } },
+      { key: "hdl", highKey: "hdl_high", label: "HDL Cholesterol", range: { type: "above", value: 40 } },
+      { key: "non_hdl", highKey: "non_hdl_high", label: "Non-HDL Cholesterol", range: { type: "below", value: 130 } },
+      { key: "triglycerides", highKey: "trig_high", label: "Triglycerides", range: { type: "below", value: 150 } },
+      { key: "ratio", highKey: null, label: "Cholesterol / HDL Ratio", range: null },
+    ];
+
+    function fmtDate(d) {
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    }
+    function fmtDateShort(d) {
+      return d.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
+    }
+
+    function renderChart(container, metric, rows) {
+      const pts = rows
+        .map((r) => ({
+          date: r._date,
+          value: r[metric.key] === "" || r[metric.key] == null ? null : parseFloat(r[metric.key]),
+          high: r[metric.highKey] === "TRUE",
+          source: r.source,
+        }))
+        .filter((p) => p.value != null && !Number.isNaN(p.value));
+
+      const card = document.createElement("div");
+      card.className = "chart-card";
+
+      const h2 = document.createElement("h2");
+      h2.textContent = metric.label;
+      card.appendChild(h2);
+
+      if (metric.range) {
+        const note = document.createElement("p");
+        note.className = "range-note";
+        note.textContent =
+          metric.range.type === "below"
+            ? `Desirable: under ${metric.range.value} mg/dL`
+            : `Desirable: over ${metric.range.value} mg/dL`;
+        card.appendChild(note);
+      }
+
+      if (!pts.length) {
+        const note = document.createElement("p");
+        note.className = "range-note";
+        note.textContent = "No data for this metric yet.";
+        card.appendChild(note);
+        container.appendChild(card);
+        return;
+      }
+
+      const W = 760, H = 180, padL = 40, padR = 54, padT = 14, padB = 26;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+
+      const minDate = pts[0].date.getTime();
+      const maxDate = pts[pts.length - 1].date.getTime();
+      const dateSpan = Math.max(1, maxDate - minDate);
+
+      const values = pts.map((p) => p.value);
+      let yMin = Math.min(...values), yMax = Math.max(...values);
+      if (metric.range) {
+        yMin = Math.min(yMin, metric.range.value);
+        yMax = Math.max(yMax, metric.range.value);
+      }
+      const padV = (yMax - yMin) * 0.18 || 10;
+      yMin = Math.max(0, yMin - padV);
+      yMax = yMax + padV;
+
+      const xAt = (d) => padL + ((d.getTime() - minDate) / dateSpan) * plotW;
+      const yAt = (v) => padT + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
+
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      svg.setAttribute("class", "chart");
+
+      // Reference band
+      if (metric.range) {
+        const bandY1 = metric.range.type === "below" ? yAt(yMax) : yAt(metric.range.value);
+        const bandY2 = metric.range.type === "below" ? yAt(metric.range.value) : yAt(yMin);
+        const band = document.createElementNS(svgNS, "rect");
+        band.setAttribute("class", "band");
+        band.setAttribute("x", padL);
+        band.setAttribute("y", Math.min(bandY1, bandY2));
+        band.setAttribute("width", plotW);
+        band.setAttribute("height", Math.abs(bandY2 - bandY1));
+        svg.appendChild(band);
+      }
+
+      // Gridlines + y labels (min/max)
+      [yMin, yMax].forEach((v) => {
+        const y = yAt(v);
+        const gl = document.createElementNS(svgNS, "line");
+        gl.setAttribute("class", "gridline");
+        gl.setAttribute("x1", padL);
+        gl.setAttribute("x2", padL + plotW);
+        gl.setAttribute("y1", y);
+        gl.setAttribute("y2", y);
+        svg.appendChild(gl);
+
+        const lbl = document.createElementNS(svgNS, "text");
+        lbl.setAttribute("class", "axis-label");
+        lbl.setAttribute("x", padL - 6);
+        lbl.setAttribute("y", y + 3);
+        lbl.setAttribute("text-anchor", "end");
+        lbl.textContent = Math.round(v);
+        svg.appendChild(lbl);
+      });
+
+      // X labels (one per point)
+      pts.forEach((p) => {
+        const lbl = document.createElementNS(svgNS, "text");
+        lbl.setAttribute("class", "axis-label");
+        lbl.setAttribute("x", xAt(p.date));
+        lbl.setAttribute("y", H - 6);
+        lbl.setAttribute("text-anchor", "middle");
+        lbl.textContent = fmtDateShort(p.date);
+        svg.appendChild(lbl);
+      });
+
+      // Line
+      const path = document.createElementNS(svgNS, "path");
+      path.setAttribute("class", "line");
+      path.setAttribute(
+        "d",
+        pts.map((p, i) => `${i === 0 ? "M" : "L"} ${xAt(p.date)} ${yAt(p.value)}`).join(" ")
+      );
+      svg.appendChild(path);
+
+      // Dots (+ hover)
+      pts.forEach((p, i) => {
+        const dot = document.createElementNS(svgNS, "circle");
+        dot.setAttribute("class", "dot" + (p.high ? " high" : ""));
+        dot.setAttribute("cx", xAt(p.date));
+        dot.setAttribute("cy", yAt(p.value));
+        dot.setAttribute("r", 4.5);
+        dot.addEventListener("mouseenter", (e) => showTooltip(e, p, metric));
+        dot.addEventListener("mousemove", (e) => positionTooltip(e));
+        dot.addEventListener("mouseleave", hideTooltip);
+        svg.appendChild(dot);
+
+        if (p.high) {
+          const hl = document.createElementNS(svgNS, "text");
+          hl.setAttribute("class", "high-label");
+          hl.setAttribute("x", xAt(p.date));
+          hl.setAttribute("y", yAt(p.value) - 10);
+          hl.setAttribute("text-anchor", "middle");
+          hl.textContent = "high";
+          svg.appendChild(hl);
+        }
+
+        if (i === pts.length - 1) {
+          const end = document.createElementNS(svgNS, "text");
+          end.setAttribute("class", "end-label");
+          end.setAttribute("x", xAt(p.date) + 8);
+          end.setAttribute("y", yAt(p.value) + 4);
+          end.textContent = p.value;
+          svg.appendChild(end);
+        }
+      });
+
+      card.appendChild(svg);
+      container.appendChild(card);
+    }
+
+    function showTooltip(e, p, metric) {
+      el.tooltip.innerHTML =
+        `${fmtDate(p.date)} &middot; ${p.source}<br>` +
+        `<strong>${p.value} mg/dL</strong>${p.high ? ' <span class="tt-high">(high)</span>' : ""}`;
+      el.tooltip.style.opacity = "1";
+      positionTooltip(e);
+    }
+    function positionTooltip(e) {
+      el.tooltip.style.left = e.clientX + 14 + "px";
+      el.tooltip.style.top = e.clientY - 10 + "px";
+    }
+    function hideTooltip() {
+      el.tooltip.style.opacity = "0";
+    }
+
+    function renderTable(rows) {
+      const table = document.createElement("table");
+      table.innerHTML = `
+        <caption>All results, most recent last</caption>
+        <thead>
+          <tr>
+            <th>Date</th><th>Source</th><th>Total</th><th>LDL</th>
+            <th>HDL</th><th>Non-HDL</th><th>Trig.</th><th>Ratio</th>
+          </tr>
+        </thead>
+      `;
+      const tbody = document.createElement("tbody");
+      rows.forEach((r) => {
+        const tr = document.createElement("tr");
+        const cell = (val, highFlag) => {
+          const td = document.createElement("td");
+          td.textContent = val === "" || val == null ? "—" : val;
+          if (r[highFlag] === "TRUE") td.className = "high";
+          return td;
+        };
+        tr.appendChild(Object.assign(document.createElement("td"), { textContent: fmtDate(r._date) }));
+        tr.appendChild(Object.assign(document.createElement("td"), { textContent: r.source }));
+        tr.appendChild(cell(r.total_cholesterol, "total_high"));
+        tr.appendChild(cell(r.ldl, "ldl_high"));
+        tr.appendChild(cell(r.hdl, "hdl_high"));
+        tr.appendChild(cell(r.non_hdl, "non_hdl_high"));
+        tr.appendChild(cell(r.triglycerides, "trig_high"));
+        tr.appendChild(cell(r.ratio, null));
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      el.tableWrap.appendChild(table);
+    }
+
+    async function init() {
+      if (!DATA_URL) {
+        el.status.textContent = "Data source isn't configured yet.";
+        return;
+      }
+      try {
+        const rows = await loadCSV(DATA_URL);
+        rows.forEach((r) => (r._date = new Date(r.date + "T00:00:00")));
+        rows.sort((a, b) => a._date - b._date);
+
+        el.status.remove();
+        METRICS.forEach((m) => renderChart(el.charts, m, rows));
+        renderTable(rows);
+      } catch (err) {
+        el.status.textContent = "Couldn't load data: " + err.message;
+      }
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
