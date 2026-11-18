@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <title>SB Fun</title>
+  <meta name="description" content="Upcoming things to do around Santa Barbara, Carpinteria & Goleta." />
+  <link rel="icon" href="/assets/Profile-J.jpg" />
+  <style>
+    :root {
+      --bg: #fbf4ea;
+      --panel: #ffffff;
+      --text: #2b2420;
+      --muted: #7a6f63;
+      --line: #e9ddcb;
+      --accent: #c0522d;
+      --accent-soft: #f3e3d4;
+      --sky: #2f6f8f;
+      --sky-soft: #e4eef1;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1c1a17;
+        --panel: #272420;
+        --text: #f1e9dd;
+        --muted: #ab9f8f;
+        --line: #3a352e;
+        --accent: #e1794f;
+        --accent-soft: #3a2a21;
+        --sky: #6fb3d2;
+        --sky-soft: #22333a;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 32px 16px 80px;
+    }
+
+    header.hero {
+      margin-bottom: 28px;
+    }
+
+    header.hero h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.7em, 5vw, 2.3em);
+    }
+
+    header.hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.5;
+      max-width: 640px;
+    }
+
+    section {
+      margin-bottom: 30px;
+    }
+
+    section h2 {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin: 0 0 4px;
+      font-size: 1.25rem;
+    }
+
+    section .section-note {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 10px;
+    }
+
+    .card a.card-title {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.02rem;
+    }
+
+    .card a.card-title:hover {
+      color: var(--accent);
+    }
+
+    .card .meta {
+      margin-top: 4px;
+      color: var(--sky);
+      font-size: 0.88rem;
+      font-weight: 500;
+    }
+
+    .card .desc {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .market-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      position: relative;
+    }
+
+    .market-card.next {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .market-card .badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+    }
+
+    .market-card .name {
+      font-weight: 600;
+      font-size: 0.98rem;
+    }
+
+    .market-card .when {
+      color: var(--sky);
+      font-size: 0.88rem;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .market-card .where {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    .link-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .link-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      text-decoration: none;
+      display: block;
+      color: var(--text);
+    }
+
+    .link-card:hover {
+      border-color: var(--sky);
+    }
+
+    .link-card .name {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .link-card .tag {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    .status-line {
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 10px 0;
+    }
+
+    footer {
+      margin-top: 40px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    footer a {
+      color: var(--sky);
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <header class="hero">
+      <h1>SB Fun</h1>
+      <p>
+        Upcoming things to do around Santa Barbara, Carpinteria & Goleta &mdash;
+        farmers markets, talks, author events, and where to check for live music.
+        This is a work in progress; some sections link out to the source instead
+        of listing events directly.
+      </p>
+    </header>
+
+    <section id="markets">
+      <h2>🧺 Farmers Markets</h2>
+      <p class="section-note">
+        Fixed weekly schedule from
+        <a href="https://www.sbfarmersmarket.org/" target="_blank" rel="noopener">sbfarmersmarket.org</a>
+        &mdash; confirm there before a holiday week.
+      </p>
+      <div class="market-grid" id="market-grid"></div>
+    </section>
+
+    <section id="talks">
+      <h2>🎙️ Talks & Science Cafes</h2>
+      <p class="section-note">
+        Live from the
+        <a href="https://www.sbnature.org/visit/calendar/?category=6" target="_blank" rel="noopener">Santa Barbara
+          Museum of Natural History's Adult Programs calendar</a>
+        (includes their Science Pub series).
+      </p>
+      <div id="talks-list">
+        <p class="status-line">Loading…</p>
+      </div>
+    </section>
+
+    <section id="music">
+      <h2>🎸 Live Music</h2>
+      <p class="section-note">
+        No venue here publishes a feed I can pull live yet, so for now this is just
+        where to look.
+      </p>
+      <div class="link-grid">
+        <a class="link-card" href="https://www.sohosb.com/" target="_blank" rel="noopener">
+          <div class="name">SOhO Restaurant & Music Club</div>
+          <div class="tag">Downtown SB</div>
+        </a>
+        <a class="link-card" href="https://lobero.org/" target="_blank" rel="noopener">
+          <div class="name">Lobero Theatre</div>
+          <div class="tag">Downtown SB</div>
+        </a>
+        <a class="link-card" href="https://www.granadasb.org/" target="_blank" rel="noopener">
+          <div class="name">Granada Theatre</div>
+          <div class="tag">Downtown SB</div>
+        </a>
+        <a class="link-card" href="https://www.velvet-jones.com/" target="_blank" rel="noopener">
+          <div class="name">Velvet Jones</div>
+          <div class="tag">Downtown SB</div>
+        </a>
+        <a class="link-card" href="https://www.artsandlectures.ucsb.edu/" target="_blank" rel="noopener">
+          <div class="name">UCSB Arts & Lectures</div>
+          <div class="tag">Campbell Hall, Goleta</div>
+        </a>
+      </div>
+    </section>
+
+    <section id="authors">
+      <h2>📚 Author & Bookstore Events</h2>
+      <p class="section-note">
+        Chaucer's events page actively blocks automated requests, so this is a
+        link directory for now rather than a live feed.
+      </p>
+      <div class="link-grid">
+        <a class="link-card" href="https://chaucersbooks.com/events" target="_blank" rel="noopener">
+          <div class="name">Chaucer's Books</div>
+          <div class="tag">State St., Santa Barbara</div>
+        </a>
+        <a class="link-card" href="https://tecolotebooks.com/" target="_blank" rel="noopener">
+          <div class="name">Tecolote Book Shop</div>
+          <div class="tag">Goleta</div>
+        </a>
+        <a class="link-card" href="https://www.santabarbaraca.gov/departments/library/events" target="_blank"
+          rel="noopener">
+          <div class="name">Santa Barbara Public Library</div>
+          <div class="tag">Multiple branches</div>
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      Built by Jeff. Farmers market schedule and venue links are hand-checked;
+      the talks section refreshes from the museum's own calendar. Something
+      stale or missing? <a href="mailto:jeffphi@gmail.com">Let me know</a>.
+    </footer>
+  </main>
+
+  <script>
+    const MARKETS = [
+      {
+        day: 2, // Tuesday
+        name: "Old Town Santa Barbara",
+        when: "Tuesdays, 3:00–6:30 PM",
+        where: "600–800 blocks of State St.",
+      },
+      {
+        day: 4, // Thursday
+        name: "Carpinteria",
+        when: "Thursdays, 2:30–6:00 PM",
+        where: "800 block of Linden Ave.",
+      },
+      {
+        day: 6, // Saturday
+        name: "Downtown Santa Barbara",
+        when: "Saturdays, 8:00 AM–1:00 PM",
+        where: "Blocks of Carrillo St. & 900–1000 State St.",
+      },
+      {
+        day: 0, // Sunday
+        name: "Goleta",
+        when: "Sundays, 10:00 AM–2:00 PM",
+        where: "Camino Real Marketplace",
+      },
+    ];
+
+    function renderMarkets() {
+      const grid = document.getElementById("market-grid");
+      const today = new Date().getDay();
+
+      let soonestGap = 8;
+      MARKETS.forEach((m) => {
+        const gap = (m.day - today + 7) % 7;
+        m._gap = gap;
+        if (gap < soonestGap) soonestGap = gap;
+      });
+
+      grid.innerHTML = "";
+      MARKETS.forEach((m) => {
+        const div = document.createElement("div");
+        div.className = "market-card" + (m._gap === soonestGap ? " next" : "");
+        const badge = m._gap === soonestGap
+          ? `<span class="badge">${m._gap === 0 ? "Today" : m._gap === 1 ? "Tomorrow" : "Next up"}</span>`
+          : "";
+        div.innerHTML = `
+          ${badge}
+          <div class="name">${m.name}</div>
+          <div class="when">${m.when}</div>
+          <div class="where">${m.where}</div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    async function renderTalks() {
+      const el = document.getElementById("talks-list");
+      try {
+        const res = await fetch("/.netlify/functions/sb-talks");
+        if (!res.ok) throw new Error("bad response");
+        const data = await res.json();
+
+        if (!data.events || data.events.length === 0) {
+          el.innerHTML = `<p class="status-line">No upcoming talks listed right now. <a href="${data.source || 'https://www.sbnature.org/visit/calendar/?category=6'}" target="_blank" rel="noopener">Check the calendar directly</a>.</p>`;
+          return;
+        }
+
+        el.innerHTML = "";
+        data.events.forEach((ev) => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <a class="card-title" href="${ev.url}" target="_blank" rel="noopener">${ev.title}</a>
+            <div class="meta">${ev.dateLabel}${ev.time ? " · " + ev.time : ""}</div>
+            ${ev.description ? `<div class="desc">${ev.description}</div>` : ""}
+          `;
+          el.appendChild(card);
+        });
+      } catch (err) {
+        el.innerHTML = `<p class="status-line">Couldn't load live listings right now &mdash;
+          <a href="https://www.sbnature.org/visit/calendar/?category=6" target="_blank" rel="noopener">check the museum's calendar directly</a>.</p>`;
+      }
+    }
+
+    renderMarkets();
+    renderTalks();
+  </script>
+</body>
+
+</html>

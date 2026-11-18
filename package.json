@@ -1,0 +1,8 @@
+{
+  "name": "jeff-exposed",
+  "private": true,
+  "description": "Source for jeff.exposed, including Netlify serverless functions.",
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}
